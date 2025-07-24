@@ -1,51 +1,93 @@
+// d:/Portofolio/Project/pelajarin.ai/frontend/app/dashboard/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { courseService } from '@/services/courseService';
+import { Course } from '@/types/course';
+import CourseCreationForm from '@/components/dashboard/CourseCreationForm';
+import CourseCard from '@/components/dashboard/CourseCard';
+import EmptyState from '@/components/dashboard/EmptyState';
+import { FiLoader } from 'react-icons/fi';
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const [token, setToken] = useState<string | null>(null);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCourses = useCallback(async () => {
+    try {
+      const data = await courseService.getCourses();
+      // Sort courses by creation date, newest first
+      data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setCourses(data);
+    } catch (err: any) {
+      setError('Sesi Anda mungkin telah berakhir. Silakan logout dan login kembali.');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('access_token');
-    if (!storedToken) {
-      router.push('/login');
-    } else {
-      setToken(storedToken);
-    }
-  }, [router]);
+    fetchCourses();
+  }, [fetchCourses]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    router.push('/login');
+  // Polling mechanism to update status of 'generating' courses
+  useEffect(() => {
+    const hasGeneratingCourses = courses.some(c => c.status === 'generating');
+
+    if (!hasGeneratingCourses) {
+      return; // No need to poll if nothing is generating
+    }
+
+    const interval = setInterval(() => {
+      console.log('Polling for course status updates...');
+      fetchCourses();
+    }, 5000); // Poll every 5 seconds
+
+    return () => clearInterval(interval); // Cleanup on component unmount
+  }, [courses, fetchCourses]);
+
+  const handleCourseCreated = () => {
+    // No need to set loading, just refetch
+    fetchCourses();
   };
 
-  if (!token) {
+  const renderContent = () => {
+    if (isLoading && courses.length === 0) {
+      return (
+        <div className="text-center py-10">
+          <FiLoader className="mx-auto h-12 w-12 text-gray-500 animate-spin" />
+          <p className="mt-4 text-white">Memuat kursus Anda...</p>
+        </div>
+      );
+    }
+
+    if (error) {
+      return <div className="text-center py-10 text-red-400">Error: {error}</div>;
+    }
+
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <p className="text-lg text-foreground">Memuat...</p>
+      <div>
+        <h2 className="text-xl font-bold text-white mb-4">Kursus Anda</h2>
+        {courses.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {courses.map((course) => (
+              <CourseCard key={course.id} course={course} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState />
+        )}
       </div>
     );
-  }
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background p-6">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-foreground">Selamat Datang di Dasbor!</h1>
-        <p className="mt-4 text-lg text-foreground/80">Anda telah berhasil masuk.</p>
-      </div>
-      <div className="mt-8 p-4 bg-card border border-border rounded-md w-full max-w-2xl overflow-auto">
-        <p className="font-mono text-sm break-all">
-          <strong>Access Token:</strong> {token}
-        </p>
-      </div>
-      <button 
-        onClick={handleLogout}
-        className="mt-8 px-6 py-3 rounded-md text-white font-semibold bg-red-600 hover:bg-red-700 transition-colors"
-      >
-        Keluar
-      </button>
-    </div>
+    <main className="container mx-auto px-4 py-8">
+      <CourseCreationForm onCourseCreated={handleCourseCreated} />
+      {renderContent()}
+    </main>
   );
 }
+
