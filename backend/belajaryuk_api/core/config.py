@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Pelajarin.ai API"
     API_V1_STR: str = "/api/v1"
+    CLIENT_ORIGIN: str
 
     # Database
     DATABASE_URL: str
