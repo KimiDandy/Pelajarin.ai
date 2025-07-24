@@ -1,6 +1,6 @@
 # backend/belajaryuk_api/schemas/course_schema.py
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, UUID4, ConfigDict
 from typing import List, Optional
 from uuid import UUID
 from datetime import datetime
@@ -47,6 +47,7 @@ class ModulePublic(BaseModel):
     title: str
     module_order: int
     sub_topics: List[SubTopicPublic]
+    assessment: Optional[AssessmentPublic]
 
     class Config:
         orm_mode = True
@@ -65,7 +66,8 @@ class CoursePublic(BaseModel):
 class CourseDetail(CoursePublic):
     """Comprehensive representation of a single course with all its contents."""
     modules: List[ModulePublic]
-    assessments: List[AssessmentPublic] # Contains all assessments for the course
+    learning_outcomes: List[str] = []
+    final_assessment: Optional[AssessmentPublic] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
