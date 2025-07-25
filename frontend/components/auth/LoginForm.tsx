@@ -12,9 +12,10 @@ import { authUtils } from '@/lib/auth';
 
 interface LoginFormProps {
   onSuccess: () => void;
+  onSwitchToRegister: () => void;
 }
 
-export default function LoginForm({ onSuccess }: LoginFormProps) {
+export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -178,12 +179,13 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
       <p className="text-center text-sm text-gray-600 mt-6">
         Belum punya akun?{' '}
-        <a
-          href="/register"
-          className="text-blue-600 hover:text-blue-700 font-medium"
-        >
-          Daftar di sini
-        </a>
+          <button
+            type="button"
+            onClick={onSwitchToRegister}
+            className="text-indigo-600 hover:text-indigo-500 font-medium"
+          >
+            Daftar di sini
+          </button>
       </p>
     </motion.div>
   );
