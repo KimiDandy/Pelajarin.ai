@@ -1,3 +1,4 @@
+import InteractiveBackground from '@/components/shared/InteractiveBackground';
 import LandingNavbar from '@/components/shared/LandingNavbar';
 import HeroSection from '@/components/shared/HeroSection';
 import FeaturesSection from '@/components/shared/FeaturesSection';
@@ -7,9 +8,10 @@ import Footer from '@/components/shared/Footer';
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background relative">
+      <InteractiveBackground />
       <LandingNavbar />
-      <main className="flex-grow">
+      <main className="flex-grow relative z-10">
         <HeroSection />
         <FeaturesSection />
         <HowItWorksSection />

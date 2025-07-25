@@ -1,20 +1,50 @@
+'use client';
+
 import React from 'react';
+import { motion } from 'framer-motion';
 
 interface FeatureCardProps {
   icon: React.ReactNode;
   title: string;
   description: string;
+  color: string;
 }
 
-const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) => {
+const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, color }) => {
   return (
-    <div className="bg-white/5 p-6 rounded-2xl border border-white/10 shadow-lg backdrop-blur-lg transition-all duration-300 hover:border-white/20 hover:shadow-primary/10">
-      <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 text-primary mb-6 shadow-inner shadow-primary/10">
-        {icon}
+    <motion.div
+      className="glass-card rounded-2xl p-8 transition-all duration-300 glow-border glow-border-hover group cursor-pointer"
+      whileHover={{ 
+        scale: 1.05, 
+        y: -5,
+        transition: { duration: 0.3 }
+      }}
+      whileTap={{ scale: 0.95 }}
+    >
+      <div className="relative">
+        <div 
+          className="flex items-center justify-center h-16 w-16 rounded-full mb-6 transition-all duration-300 group-hover:scale-110"
+          style={{ backgroundColor: `${color}20`, color: color }}
+        >
+          {icon}
+        </div>
+        
+        <h3 className="text-2xl font-bold text-[#F0F2F5] mb-3 group-hover:text-glow transition-all duration-300">
+          {title}
+        </h3>
+        
+        <p className="text-[#A0AEC0] leading-relaxed">
+          {description}
+        </p>
+        
+        <div 
+          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{ 
+            background: `radial-gradient(circle at center, ${color}10 0%, transparent 70%)`,
+          }}
+        />
       </div>
-      <h3 className="text-xl font-bold text-foreground mb-2">{title}</h3>
-      <p className="text-neutral-300">{description}</p>
-    </div>
+    </motion.div>
   );
 };
 

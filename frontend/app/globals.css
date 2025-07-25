@@ -2,26 +2,103 @@
 
 @layer base {
   :root {
-    --background: 222 84% 5%; /* Warna dasar gelap (Dark Blue/Black) */
-    --foreground: 210 40% 98%; /* Putih terang untuk teks */
-
-    --card: 222 84% 10%; /* Warna kartu yang sedikit lebih terang dari background */
-    --card-foreground: 210 40% 98%;
-
-    /* Palet warna Indigo/Biru sebagai aksen utama */
-    --primary: 242 70% 60%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    /* Luminous Mind Color Palette */
+    --background: 222 84% 2%; /* #02040A - Dark Blue-Black */
+    --foreground: 210 20% 96%; /* #F0F2F5 - Cream White */
     
-    --border: 217 33% 25%; /* Border yang halus untuk elemen di tema gelap */
+    --card: 222 84% 8% / 0.7; /* Semi-transparent dark */
+    --card-foreground: 210 20% 96%;
+    
+    --primary: 221 83% 59%; /* #4361EE - Electric Blue */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 271 79% 38%; /* #7209B7 - Violet/Purple */
+    --secondary-foreground: 0 0% 100%;
+    
+    --accent: 221 83% 59%;
+    --accent-foreground: 0 0% 100%;
+    
+    --muted: 210 15% 63%; /* #A0AEC0 - Blue-Gray */
+    --muted-foreground: 210 15% 63%;
+    
+    --border: 221 83% 59% / 0.2;
+    --input: 221 83% 59% / 0.1;
+    --ring: 221 83% 59%;
+    
+    /* Glow colors */
+    --glow-primary: 221 83% 59%;
+    --glow-secondary: 271 79% 38%;
   }
 }
 
 @layer utilities {
   .bg-gradient-primary {
     @apply bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--primary)/0.8)];
+  }
+  
+  .glass-card {
+    @apply bg-[hsl(var(--card))] backdrop-blur-md border border-[hsl(var(--border))] shadow-lg;
+  }
+  
+  .glow-border {
+    @apply border border-[hsl(var(--glow-primary)/0.3)] shadow-lg shadow-[hsl(var(--glow-primary)/0.2)];
+  }
+  
+  .glow-border-hover {
+    @apply hover:border-[hsl(var(--glow-primary)/0.5)] hover:shadow-[hsl(var(--glow-primary)/0.4)];
+  }
+  
+  .text-glow {
+    text-shadow: 0 0 10px hsl(var(--glow-primary)/0.5);
+  }
+  
+  .aurora-bg {
+    background: radial-gradient(ellipse at top, hsl(var(--glow-primary)/0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom, hsl(var(--glow-secondary)/0.1) 0%, transparent 50%);
+  }
+  
+  .sheen-animation {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .sheen-animation::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      45deg,
+      transparent 30%,
+      hsl(var(--glow-primary)/0.3) 50%,
+      transparent 70%
+    );
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    animation: sheen 3s infinite;
+  }
+  
+  @keyframes sheen {
+    0% {
+      transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    }
+    100% {
+      transform: translateX(100%) translateY(100%) rotate(45deg);
+    }
+  }
+  
+  .pulsating-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+  
+  @keyframes pulse-glow {
+    from {
+      box-shadow: 0 0 20px hsl(var(--glow-primary)/0.3);
+    }
+    to {
+      box-shadow: 0 0 40px hsl(var(--glow-primary)/0.6), 0 0 60px hsl(var(--glow-secondary)/0.3);
+    }
   }
 }
 
