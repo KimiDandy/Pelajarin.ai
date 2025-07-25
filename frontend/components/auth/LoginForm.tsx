@@ -2,20 +2,20 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
-import { Eye, EyeOff } from 'lucide-react';
-import { validateEmail, validatePassword } from '@/lib/authValidation';
-import { Button } from '@/components/ui/Button';
 import { authService } from '@/services/authService';
 import { authUtils } from '@/lib/auth';
+import { validateEmail, validatePassword } from '@/lib/authValidation';
+import { Button } from '@/components/ui/Button';
+import { Eye, EyeOff } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface LoginFormProps {
   onSuccess: () => void;
   onSwitchToRegister: () => void;
+  onError: (error: string) => void;
 }
 
-export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
+export default function LoginForm({ onSuccess, onSwitchToRegister, onError }: LoginFormProps) {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -68,11 +68,10 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormPr
       // Store the token using auth utility
       authUtils.setToken(response.access_token);
       
-      toast.success('Login berhasil!');
       onSuccess();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Login gagal. Email atau password salah.';
-      toast.error(errorMessage);
+      onError(errorMessage);
     } finally {
       setIsLoading(false);
     }
