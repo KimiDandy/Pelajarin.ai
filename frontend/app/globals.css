@@ -67,7 +67,16 @@
   
   .sheen-animation {
     position: relative;
-    overflow: hidden;
+    --radius: 0.7rem;
+  }
+
+  @keyframes indeterminate-progress {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+  }
+
+  .animate-indeterminate-progress {
+    animation: indeterminate-progress 1.5s ease-in-out infinite;
   }
   
   .sheen-animation::before {
@@ -230,5 +239,28 @@
   .auth-canvas-background {
     background-size: 60px 60px;
     animation-duration: 20s;
+  }
+}
+
+/* The Learning Studio - Paper & Ink Theme */
+@layer base {
+  .theme-studio {
+    --studio-bg: 0 0% 98.4%; /* #FBFBFB */
+    --studio-primary: 226 65% 32%; /* #1E3A8A */
+    --studio-secondary: 34 95% 43%; /* #D97706 */
+    --studio-text-primary: 215 28% 17%; /* #1F2937 */
+    --studio-text-secondary: 215 14% 47%; /* #6B7280 */
+    --studio-border: 220 13% 91%; /* #E5E7EB */
+    --studio-surface: 0 0% 100%; /* #FFFFFF */
+
+    background-color: hsl(var(--studio-bg));
+    color: hsl(var(--studio-text-primary));
+  }
+}
+
+@layer utilities {
+  .paper-texture {
+    /* Subtle paper texture */
+    background-image: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23e5e7eb' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E");
   }
 }
