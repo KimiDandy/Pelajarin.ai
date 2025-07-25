@@ -53,29 +53,11 @@ const testimonials: Testimonial[] = [
 ];
 
 const TestimonialsSection = () => {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-      },
-    },
-  };
+  // Duplicate testimonials for infinite scroll
+  const extendedTestimonials = [...testimonials, ...testimonials, ...testimonials];
 
   return (
-    <section id="testimonials" className="py-20 relative">
+    <section id="testimoni" className="py-20 relative overflow-hidden">
       <div className="container mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -84,26 +66,36 @@ const TestimonialsSection = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-[hsl(var(--foreground))] mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--secondary))] bg-clip-text text-transparent">
             Apa Kata Mereka?
           </h2>
           <p className="text-xl text-[hsl(var(--muted-foreground))] max-w-2xl mx-auto">
             Pengalaman nyata dari mereka yang telah merasakan transformasi belajar dengan AI
           </p>
         </motion.div>
+      </div>
 
+      {/* Marquee Container */}
+      <div className="relative w-full overflow-hidden">
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+          className="flex space-x-8 py-4"
+          animate={{
+            x: ['0%', '-33.33%'],
+          }}
+          transition={{
+            x: {
+              repeat: Infinity,
+              repeatType: 'loop',
+              duration: 30,
+              ease: 'linear',
+            },
+          }}
+          whileHover={{ animationPlayState: 'paused' }}
         >
-          {testimonials.map((testimonial) => (
-            <motion.div
-              key={testimonial.id}
-              variants={itemVariants}
-              className="glass-card rounded-xl p-6 glow-border-hover transition-all duration-300 hover:scale-105"
+          {extendedTestimonials.map((testimonial, index) => (
+            <div
+              key={`${testimonial.id}-${index}`}
+              className="glass-card rounded-xl p-6 glow-border-hover transition-all duration-300 hover:scale-105 flex-shrink-0 w-80 md:w-96"
             >
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[hsl(var(--primary))] to-[hsl(var(--secondary))] flex items-center justify-center font-bold text-white mr-4">
@@ -127,7 +119,7 @@ const TestimonialsSection = () => {
               <p className="text-[hsl(var(--foreground))] leading-relaxed text-sm">
                 {testimonial.content}
               </p>
-            </motion.div>
+            </div>
           ))}
         </motion.div>
       </div>

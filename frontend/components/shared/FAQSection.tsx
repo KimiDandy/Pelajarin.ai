@@ -86,16 +86,32 @@ const FAQSection = () => {
             >
               <button
                 onClick={() => toggleFAQ(index)}
-                className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-[hsl(var(--background)/0.5)] transition-colors duration-300"
+                className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-[hsl(var(--background)/0.5)] transition-colors duration-300 relative"
               >
-                <h3 className="text-lg font-semibold text-[hsl(var(--foreground))]">
-                  {item.question}
-                </h3>
+                <div className="flex items-center space-x-4">
+                  {/* Glowing vertical line */}
+                  <motion.div
+                    className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[hsl(var(--primary))] to-[hsl(var(--secondary))]"
+                    initial={{ scaleY: 0 }}
+                    animate={{ scaleY: openIndex === index ? 1 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                  <h3 className="text-lg font-semibold text-[hsl(var(--foreground))]">
+                    {item.question}
+                  </h3>
+                </div>
                 <motion.div
                   animate={{ rotate: openIndex === index ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="relative"
                 >
                   <ChevronDown className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--secondary))] rounded-full"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: openIndex === index ? 1.5 : 0, opacity: openIndex === index ? 0 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  />
                 </motion.div>
               </button>
 
@@ -105,13 +121,18 @@ const FAQSection = () => {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="overflow-hidden"
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden relative"
                   >
-                    <div className="px-6 pb-4">
-                      <p className="text-[hsl(var(--muted-foreground))] leading-relaxed">
+                    <div className="px-6 pb-4 pl-10">
+                      <motion.p
+                        className="text-[hsl(var(--muted-foreground))] leading-relaxed"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: 0.1 }}
+                      >
                         {item.answer}
-                      </p>
+                      </motion.p>
                     </div>
                   </motion.div>
                 )}
