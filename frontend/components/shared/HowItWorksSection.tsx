@@ -18,26 +18,26 @@ const HowItWorksSection = () => {
   ];
 
   return (
-    <section id="cara-kerja" className="py-20 bg-white">
+    <section id="cara-kerja" className="py-20 bg-transparent">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
+        <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground">Hanya Butuh 3 Langkah Mudah</h2>
-          <p className="mt-4 text-lg text-foreground/80">Mulai perjalanan belajar Anda dalam hitungan menit.</p>
+          <p className="mt-4 text-lg text-neutral-300">Mulai perjalanan belajar Anda dalam hitungan menit.</p>
         </div>
         <div className="relative">
           {/* Dotted line for desktop */}
-          <div className="hidden md:block absolute top-1/2 left-0 w-full h-px bg-border border-t-2 border-dashed -translate-y-1/2"></div>
+          <div className="hidden md:block absolute top-1/2 left-0 w-full h-px bg-white/10 -translate-y-1/2"></div>
           
           <div className="relative grid grid-cols-1 md:grid-cols-3 gap-12">
             {steps.map((step) => (
-              <div key={step.number} className="text-center bg-white p-4">
-                <div className="flex items-center justify-center mb-4">
-                   <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary font-bold text-2xl border-2 border-primary/20">
+              <div key={step.number} className="text-center bg-white/5 p-8 rounded-2xl border border-white/10 shadow-lg backdrop-blur-lg">
+                <div className="flex items-center justify-center mb-6">
+                   <div className="flex items-center justify-center h-20 w-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 text-primary font-bold text-3xl border-2 border-primary/30 shadow-lg">
                     {step.number}
                   </div>
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-2">{step.title}</h3>
-                <p className="text-foreground/80">{step.description}</p>
+                <p className="text-neutral-300">{step.description}</p>
               </div>
             ))}
           </div>

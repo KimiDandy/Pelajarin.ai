@@ -2,18 +2,20 @@
 
 @layer base {
   :root {
-    --background: 240 10% 98%; /* #F8F8F8 */
-    --foreground: 222.2 84% 4.9%;
+    --background: 222 84% 5%; /* Warna dasar gelap (Dark Blue/Black) */
+    --foreground: 210 40% 98%; /* Putih terang untuk teks */
 
-    --card: 0 0% 100%;
+    --card: 222 84% 10%; /* Warna kartu yang sedikit lebih terang dari background */
+    --card-foreground: 210 40% 98%;
 
-    --primary: 172.5 75.1% 40.2%;
+    /* Palet warna Indigo/Biru sebagai aksen utama */
+    --primary: 242 70% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
     
-    --border: 214.3 31.8% 91.4%;
+    --border: 217 33% 25%; /* Border yang halus untuk elemen di tema gelap */
   }
 }
 
