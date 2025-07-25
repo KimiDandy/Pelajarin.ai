@@ -4,10 +4,9 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { authService } from '@/services/authService';
 import { authUtils } from '@/lib/auth';
-import { validateEmail, validatePassword } from '@/lib/authValidation';
+import { validateEmail } from '@/lib/authValidation';
 import { Button } from '@/components/ui/Button';
 import { Eye, EyeOff } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 
 interface LoginFormProps {
   onSuccess: () => void;
@@ -24,7 +23,7 @@ export default function LoginForm({ onSuccess, onSwitchToRegister, onError }: Lo
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
