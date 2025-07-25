@@ -196,3 +196,30 @@
   }
 }
 
+/* Bright Aurora Background for Auth Flow */
+.auth-background {
+  background-color: #f8f9fa;
+  background-image: 
+    radial-gradient(circle at 10% 20%, #e0c3fc 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, #8ec5fc 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, #a8edea 0%, transparent 60%);
+  animation: background-pan 20s ease-in-out infinite alternate;
+  background-size: 200% 200%;
+}
+
+@keyframes background-pan {
+  from {
+    background-position: 0% 0%;
+  }
+  to {
+    background-position: 100% 100%;
+  }
+}
+
+/* Responsive background adjustments */
+@media (max-width: 768px) {
+  .auth-background {
+    background-size: 300% 300%;
+    animation-duration: 15s;
+  }
+}

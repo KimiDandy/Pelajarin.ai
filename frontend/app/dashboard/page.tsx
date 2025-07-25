@@ -7,7 +7,8 @@ import { Course } from '@/types/course';
 import CourseCreationForm from '@/components/dashboard/CourseCreationForm';
 import CourseCard from '@/components/dashboard/CourseCard';
 import EmptyState from '@/components/dashboard/EmptyState';
-import { FiLoader } from 'react-icons/fi';
+import { FiLoader, FiLogOut } from 'react-icons/fi';
+import { authUtils } from '@/lib/auth';
 
 export default function DashboardPage() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -83,8 +84,22 @@ export default function DashboardPage() {
     );
   };
 
+  const handleLogout = () => {
+    authUtils.logout();
+  };
+
   return (
     <main className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+        >
+          <FiLogOut size={16} />
+          Logout
+        </button>
+      </div>
       <CourseCreationForm onCourseCreated={handleCourseCreated} />
       {renderContent()}
     </main>
