@@ -21,9 +21,10 @@ export default function DashboardPage() {
       // Sort courses by creation date, newest first
       data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       setCourses(data);
-    } catch (err: any) {
-      setError('Sesi Anda mungkin telah berakhir. Silakan logout dan login kembali.');
-      console.error(err);
+    } catch (error: Error | unknown) {
+      console.error('Error fetching courses:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Gagal memuat kursus.';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

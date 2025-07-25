@@ -2,20 +2,19 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
-import { Eye, EyeOff } from 'lucide-react';
-import { validateEmail, validatePassword, validateName } from '@/lib/authValidation';
-import { Button } from '@/components/ui/Button';
 import { authService } from '@/services/authService';
 import { authUtils } from '@/lib/auth';
+import { validateEmail, validatePassword } from '@/lib/authValidation';
+import { Button } from '@/components/ui/Button';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface RegisterFormProps {
   onSuccess: () => void;
   onSwitchToLogin: () => void;
+  onError: (error: string) => void;
 }
 
-export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) {
+export default function RegisterForm({ onSuccess, onSwitchToLogin, onError }: RegisterFormProps) {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -27,7 +26,6 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -41,11 +39,6 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
-    // Name validation
-    if (!validateName(formData.fullName)) {
-      newErrors.fullName = 'Nama harus minimal 2 karakter dan hanya berisi huruf';
-    }
 
     // Email validation
     if (!validateEmail(formData.email)) {
@@ -76,13 +69,13 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
     setIsLoading(true);
 
     try {
-      const response = await authService.register({
+      const registerResponse = await authService.register({
         email: formData.email,
         password: formData.password,
         full_name: formData.fullName
       });
       
-      // Auto-login after successful registration
+      // Auto-login after registration
       const loginResponse = await authService.login({
         email: formData.email,
         password: formData.password
@@ -91,11 +84,10 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
       // Store the token using auth utility
       authUtils.setToken(loginResponse.access_token);
       
-      toast.success('Registrasi berhasil! Anda akan diarahkan ke dashboard.');
       onSuccess();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Registrasi gagal. Silakan coba lagi.';
-      toast.error(errorMessage);
+      onError(errorMessage);
     } finally {
       setIsLoading(false);
     }

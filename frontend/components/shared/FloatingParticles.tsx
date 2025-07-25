@@ -8,7 +8,6 @@ const FloatingParticles = () => {
   const cursorY = useMotionValue(0);
   const [isVisible, setIsVisible] = useState(false);
 
-  // Smooth cursor tracking
   const smoothCursorX = useSpring(cursorX, { stiffness: 300, damping: 30 });
   const smoothCursorY = useSpring(cursorY, { stiffness: 300, damping: 30 });
 
@@ -30,11 +29,10 @@ const FloatingParticles = () => {
       window.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, []);
+  }, [cursorX, cursorY]);
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-      {/* Main cursor glow */}
       <motion.div
         className="absolute rounded-full pointer-events-none"
         style={{
@@ -59,7 +57,6 @@ const FloatingParticles = () => {
         }}
       />
       
-      {/* Secondary particles */}
       {[...Array(5)].map((_, i) => (
         <motion.div
           key={i}
