@@ -30,12 +30,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col items-center">
-      <h1 className="text-2xl font-bold text-foreground mb-2">Masuk ke Akun Anda</h1>
-      <p className="text-foreground/70 mb-6">Selamat datang kembali!</p>
-      <form onSubmit={handleSubmit} className="w-full space-y-4">
+    <div className="bg-white/5 p-8 rounded-2xl border border-white/10 shadow-xl backdrop-blur-lg">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-foreground">Masuk ke Akun Anda</h1>
+        <p className="text-neutral-300 mt-2">Selamat datang kembali!</p>
+      </div>
+      <form onSubmit={handleSubmit} className="w-full space-y-6">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-foreground/80 mb-1">Email</label>
+          <label htmlFor="email" className="block text-sm font-medium text-neutral-300 mb-2">Email</label>
           <input
             id="email"
             name="email"
@@ -45,11 +47,11 @@ export default function LoginPage() {
             disabled={isLoading}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-border rounded-md bg-background focus:ring-primary focus:border-primary disabled:opacity-50"
+            className="w-full px-4 py-3 border border-white/10 rounded-lg bg-white/5 text-foreground placeholder-neutral-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300 disabled:opacity-50"
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-foreground/80 mb-1">Password</label>
+          <label htmlFor="password" className="block text-sm font-medium text-neutral-300 mb-2">Password</label>
           <input
             id="password"
             name="password"
@@ -59,16 +61,16 @@ export default function LoginPage() {
             disabled={isLoading}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-border rounded-md bg-background focus:ring-primary focus:border-primary disabled:opacity-50"
+            className="w-full px-4 py-3 border border-white/10 rounded-lg bg-white/5 text-foreground placeholder-neutral-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300 disabled:opacity-50"
           />
         </div>
-        <Button type="submit" disabled={isLoading} className="w-full mt-4">
+        <Button type="submit" disabled={isLoading} className="w-full text-lg py-3 mt-4 transition-all duration-300 hover:shadow-[0_0_20px_hsl(var(--primary))]">
           {isLoading ? 'Memproses...' : 'Masuk'}
         </Button>
       </form>
-      <p className="mt-6 text-center text-sm text-foreground/70">
+      <p className="mt-8 text-center text-sm text-neutral-400">
         Belum punya akun?{' '}
-        <Link href="/register" className="font-medium text-primary hover:underline">
+        <Link href="/register" className="font-medium text-primary hover:text-primary/80 transition-colors">
           Daftar di sini
         </Link>
       </p>
