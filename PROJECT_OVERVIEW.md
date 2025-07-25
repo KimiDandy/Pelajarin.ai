@@ -1,10 +1,13 @@
 # Dokumentasi Teknis Proyek Pelajarin.ai
 
-**Tanggal Dokumen:** 25 Juli 2025
+**Tanggal Dokumen:** 25 Juli 2025 (Last Updated: 23:33 WIB)
 
 ## 1. Ringkasan Proyek
 
 Pelajarin.ai adalah sebuah platform pembelajaran online berbasis AI yang dirancang untuk menghasilkan kursus secara dinamis. Proyek ini terdiri dari dua komponen utama: **backend** yang dibangun dengan FastAPI untuk mengelola data dan logika bisnis, dan **frontend** yang dibangun dengan Next.js untuk menyajikan antarmuka pengguna yang interaktif.
+
+### 🎯 **Milestone Terbaru: "Architect's Canvas" - Redesign Auth System**
+Proyek telah menyelesaikan transformasi besar pada sistem autentikasi dengan konsep "Architect's Canvas", menggantikan tema gelap sebelumnya dengan desain terang, profesional, dan terintegrasi.
 
 Dokumen ini berfungsi sebagai sumber kebenaran tunggal (`single source of truth`) untuk semua aspek teknis proyek per tanggal yang disebutkan di atas.
 
@@ -81,31 +84,47 @@ backend/
 └── alembic.ini             # Konfigurasi Alembic
 ```
 
-### 3.2. Frontend (`/frontend`)
+### 2.2. Frontend (`/frontend`)
 
 ```
 frontend/
 ├── app/
 │   ├── (auth)/             # Grup rute untuk halaman autentikasi
-│   │   ├── login/page.tsx  # Komponen halaman Login
-│   │   └── register/page.tsx # Komponen halaman Register
-│   ├── (protected)/        # Grup rute yang memerlukan login (misal: dashboard)
-│   ├── layout.tsx          # Layout root, menerapkan font, provider, dan style global
-│   ├── page.tsx            # Komponen halaman landing
-│   └── globals.css         # File CSS global, @tailwind layers, dan variabel tema
+│   │   ├── login/page.tsx  # Halaman login dengan AuthFlow
+│   │   └── register/page.tsx # Halaman register dengan AuthFlow
+│   ├── dashboard/          # Grup rute dashboard yang dilindungi
+│   │   ├── page.tsx        # Dashboard utama
+│   │   └── course/[id]/    # Detail kursus dengan Promise params
+│   ├── layout.tsx          # Layout root dengan blueprint grid background
+│   ├── page.tsx            # Landing page dengan "Luminous Mind" theme
+│   └── globals.css         # CSS global dengan animated blueprint grid
 ├── components/
+│   ├── auth/               # Komponen autentikasi baru
+│   │   ├── AuthFlow.tsx    # Komponen utama login/register terpadu
+│   │   ├── AuthInfographic.tsx # Panel keunggulan platform
+│   │   ├── LoginForm.tsx   # Form login dengan validasi
+│   │   └── RegisterForm.tsx # Form register dengan auto-login
 │   ├── shared/             # Komponen kompleks yang digunakan di banyak halaman
-│   │   └── Navbar.tsx      # Komponen navigasi utama
+│   │   ├── Navbar.tsx      # Navigasi utama
+│   │   ├── FloatingParticles.tsx # Efek partikel mengambang
+│   │   └── StatsSection.tsx # Statistik landing page
+│   ├── dashboard/          # Komponen dashboard
+│   │   └── CourseCreationForm.tsx # Form pembuatan kursus AI
 │   └── ui/                 # Komponen UI dasar dan atomik
 │       └── Button.tsx      # Komponen tombol reusable dengan CVA
 ├── lib/
-│   └── utils.ts            # Fungsi utilitas, terutama 'cn' untuk classnames
-├── public/                 # Aset statis (gambar, ikon)
+│   ├── auth.ts             # Utilitas manajemen token JWT
+│   ├── authValidation.ts   # Validasi form autentikasi
+│   └── utils.ts            # Fungsi utilitas umum
 ├── services/
-│   └── api.ts              # Konfigurasi instance Axios untuk komunikasi backend
-├── tailwind.config.ts      # Konfigurasi Tailwind CSS (tema, plugin, dll)
-├── tsconfig.json           # Konfigurasi TypeScript untuk proyek
-└── package.json            # Daftar dependensi npm dan skrip proyek
+│   ├── api.ts              # Instance Axios dengan interceptor
+│   ├── authService.ts      # Service autentikasi
+│   └── courseService.ts    # Service kursus
+├── public/                 # Aset statis
+├── tailwind.config.ts      # Konfigurasi Tailwind CSS v4
+├── next.config.js          # Konfigurasi Next.js
+├── tsconfig.json           # Konfigurasi TypeScript
+└── package.json            # Dependensi dan skrip
 ```
 
 ---
@@ -193,51 +212,275 @@ Fitur inti dari Pelajarin.ai adalah sistem pembuatan kurikulum berbasis AI yang 
 
 Selama pengembangan, beberapa keputusan teknis diambil yang sedikit berbeda dari rencana awal. Keputusan ini krusial untuk mengatasi tantangan teknis, memastikan stabilitas, dan meningkatkan kualitas produk.
 
+### 5.1. **Major Update: Sistem Autentikasi "Architect's Canvas"**
+
+#### **Transformasi Total UI/UX**
+- **Tema Sebelumnya:** Dark particle theme dengan warna gelap dan efek partikel
+- **Tema Baru:** "Architect's Canvas" - desain terang, profesional, dengan konsep "belajar sebagai pencahayaan"
+
+#### **Komponen Baru & Refaktor**
+- **AuthFlow.tsx**: Komponen unifikasi login/register dalam satu halaman
+- **AuthInfographic.tsx**: Panel keunggulan platform dengan animasi holografik
+- **Sistem Notifikasi Modal**: Menggantikan react-hot-toast dengan modal overlay elegan
+- **Background Animasi**: Aurora gradient dengan blueprint grid pattern
+
+#### **Perubahan Teknis**
+- Penyimpanan token JWT di localStorage dengan key `access_token`
+- Auto-login setelah registrasi berhasil
+- Navigasi internal tanpa perubahan URL
+- Error handling terpusat di komponen AuthFlow
+
+### 5.2. Backend: Logika Serialisasi Data (ORM ke Pydantic)
+
 ### 5.1. Backend: Logika Serialisasi Data (ORM ke Pydantic)
 
 -   **Masalah Awal:** Terjadi `ValidationError` yang persisten dan sulit di-debug saat mencoba mengonversi objek SQLAlchemy (yang memiliki relasi bertingkat seperti `course -> modules -> sub_topics`) menjadi skema Pydantic (`CourseDetail`). Penggunaan `__dict__` pada objek ORM dan dekorator `@field_validator` atau `@computed_field` di Pydantic terbukti tidak stabil dan rawan error karena menyertakan atribut internal SQLAlchemy (`_sa_instance_state`).
 -   **Solusi & Deviasi:** Logika transformasi data dipindahkan sepenuhnya dari level skema Pydantic ke level *router endpoint* (`/routers/course_router.py`). Di dalam endpoint `GET /{course_id}`, data dibangun secara manual menjadi struktur `dict` sebelum dikembalikan. Pendekatan ini, meskipun lebih verbose, memberikan kontrol penuh atas data yang diekspos oleh API, menghilangkan semua `ValidationError`, dan memastikan respons yang konsisten dan dapat diandalkan.
 
-### 5.2. Frontend: Refactor UI/UX Halaman Detail Kurikulum
+### 5.3. Frontend: Refactor UI/UX Halaman Detail Kurikulum
 
--   **Masalah Awal:** Tampilan awal halaman detail kurikulum terlalu lebar, deskripsi kursus tidak terformat dengan baik, dan daftar sub-topik bersifat statis, sehingga pengalaman pengguna terasa kurang optimal.
--   **Solusi & Deviasi:** Dilakukan perombakan UI/UX yang signifikan:
-    1.  **Rendering Deskripsi dengan Markdown:** Implementasi `react-markdown` dengan plugin `@tailwindcss/typography` (`prose`). Ini memungkinkan deskripsi yang dihasilkan AI (yang seringkali mengandung format Markdown) untuk di-render dengan benar, lengkap dengan paragraf, daftar, dan penekanan teks yang estetis.
-    2.  **Layout Proporsional:** Lebar kontainer utama dibatasi dengan `max-w-5xl` agar lebih fokus dan nyaman dibaca di layar besar.
-    3.  **Navigasi Sub-Topik Interaktif:** Setiap item sub-topik diubah dari teks statis menjadi komponen `<Link>` interaktif dengan *hover effects* dan ikon yang jelas. Ini memberikan *affordance* (petunjuk visual) yang kuat bahwa setiap sub-topik adalah materi yang dapat dieksplorasi.
-    4.  **Konsistensi Tombol Aksi:** Semua tombol *call-to-action* (Mulai Kuis, Mulai Ujian) distandarisasi menggunakan gradien warna primer (`bg-gradient-primary`) dan ikonografi interaktif untuk menciptakan pengalaman visual yang kohesif dan profesional.
+-   **Masalah Awal:** Tampilan awal halaman detail kurikulum terlalu lebar, deskripsi kursus tidak terformat dengan baik, dan daftar sub-topik bersifat statis.
+-   **Solusi & Deviasi:** Perombakan UI/UX signifikan dengan react-markdown, layout proporsional, dan navigasi interaktif.
+
+### 5.4. **Next.js 15 Compatibility Updates**
+
+-   **Masalah:** Error TypeScript dengan Promise params di dynamic routes
+-   **Solusi:** Update semua halaman dengan params untuk menggunakan Promise resolution pattern
+-   **File yang diperbarui:** `app/dashboard/course/[id]/page.tsx`
+
+### 5.5. **Code Quality & Linting**
+
+-   **Perubahan:** Penghapusan semua import dan variabel tidak terpakai
+-   **Fix:** Error typing dari `any` ke `Error | unknown`
+-   **Optimasi:** Dependency array React hooks untuk menghilangkan warning ESLint
 
 ---
 
 ## 6. Rincian Frontend
 
-### 5.1. Arsitektur & Styling
+### 6.1. **Arsitektur & Styling Terbaru**
 
--   **Routing:** Menggunakan App Router dari Next.js 15. Rute dikelompokkan berdasarkan status autentikasi (`(auth)` dan `(protected)`).
--   **Theming:** Menggunakan sistem berbasis CSS Variables yang didefinisikan di `app/globals.css`. Variabel ini kemudian dipetakan ke dalam `tailwind.config.ts` untuk memungkinkan penggunaan *semantic colors* seperti `bg-background`, `text-primary`, dll.
--   **Custom Utilities:**
-    - `.bg-gradient-primary`: Sebuah kelas utilitas kustom yang didefinisikan di `app/globals.css` di dalam `@layer utilities` untuk membuat latar belakang gradien pada tombol utama.
+#### **Design System: "Architect's Canvas"**
+- **Konsep:** Learning as illumination - dark canvas with glowing elements
+- **Warna Utama:**
+  - Background: `#02040A` (dark blue-black)
+  - Primary: `#4361EE` (electric blue)
+  - Secondary: `#7209B7` (violet/purple)
+  - Text Primary: `#F0F2F5` (cream white)
+  - Text Secondary: `#A0AEC0` (blue-gray)
 
-### 5.2. Komponen Kunci
+#### **Animasi & Interaktivitas**
+- **Framer Motion**: Untuk semua transisi dan animasi
+- **React Spring**: Untuk efek partikel mengambang
+- **CSS Animations**: Aurora gradient dan blueprint grid background
 
--   **`components/ui/Button.tsx`**: Komponen tombol yang sangat dapat digunakan kembali. Dibangun dengan CVA untuk mendukung berbagai `variant` (default, outline, destructive, dll.) dan `size`. Menggunakan `@radix-ui/react-slot` dan prop `asChild` untuk mengintegrasikan fungsionalitas tombol dengan komponen lain seperti `Link` dari Next.js tanpa merusak SEO atau fungsionalitas.
--   **`lib/utils.ts`**: Berisi fungsi `cn` yang menggabungkan `clsx` dan `tailwind-merge` untuk menangani penggabungan dan penggantian kelas Tailwind CSS secara cerdas, mencegah konflik *styling*.
+### 6.2. **Komponen Kunci Baru**
+
+#### **Authentication Components**
+- **`AuthFlow.tsx`**: Komponen unifikasi login/register dengan state management
+- **`AuthInfographic.tsx`**: Panel 6 keunggulan platform dengan animasi holografik
+- **`LoginForm.tsx`**: Form login dengan validasi real-time
+- **`RegisterForm.tsx`**: Form register dengan auto-login setelah registrasi
+
+#### **Sistem Notifikasi**
+- **Modal Overlay**: Menggantikan react-hot-toast dengan modal sentral
+- **Status Support**: Sukses (auto-dismiss) dan Error (manual close)
+- **Animasi**: Fade-in/out dengan framer-motion
+
+#### **Landing Page Components**
+- **`FloatingParticles.tsx`**: Partikel mengambang dengan motion values
+- **`InteractiveBackground.tsx`**: Background aurora dengan blueprint grid
+- **`StatsSection.tsx`**: Statistik platform dengan animasi counter
+
+### 6.3. **Dependencies Terbaru**
+
+#### **Core Dependencies**
+- **Next.js**: `15.4.3` dengan App Router
+- **React**: `19.1.0` dengan TypeScript `~5`
+- **Tailwind CSS**: `v4.0` dengan PostCSS integration
+
+#### **Animation & UI**
+- **Framer Motion**: `^12.0.0` untuk animasi halus
+- **React Spring**: Untuk efek partikel
+- **Lucide React**: Ikon modern dan konsisten
+
+#### **State Management & Auth**
+- **JWT Token Storage**: localStorage dengan key `access_token`
+- **Axios Interceptors**: Untuk Authorization header otomatis
+- **React Hooks**: useState, useEffect untuk state management lokal
 
 ---
 
-## 6. Alur Kerja & Setup
+## 7. **Technical Specifications & Setup**
 
-### 6.1. Menjalankan Backend
+### 7.1. **Environment Variables**
 
-1.  Navigasi ke direktori `/backend`.
-2.  Instal dependensi: `poetry install`.
-3.  Buat file `.env` dari `.env.example` dan isi konfigurasinya.
-4.  Jalankan server: `poetry run uvicorn belajaryuk_api.main:app --reload`.
+#### **Backend (.env)**
+```bash
+# Database
+DATABASE_URL=postgresql://user:password@localhost/pelajarin_db
 
-### 6.2. Menjalankan Frontend
+# JWT
+SECRET_KEY=your-secret-key-here
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
 
-1.  Navigasi ke direktori `/frontend`.
-2.  Instal dependensi: `npm install`.
-3.  Jalankan server pengembangan: `npm run dev`.
-4.  Aplikasi akan tersedia di `http://localhost:3000`.
+# AI Service
+GOOGLE_API_KEY=your-gemini-api-key
+```
 
+#### **Frontend (.env.local)**
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+### 7.2. **Running the Application**
+
+#### **Backend Setup**
+```bash
+cd backend
+poetry install
+poetry run alembic upgrade head
+poetry run uvicorn belajaryuk_api.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+#### **Frontend Setup**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### 7.3. **Build & Deployment**
+
+#### **Frontend Build**
+```bash
+npm run build
+npm start
+```
+
+#### **Backend Production**
+```bash
+poetry run uvicorn belajaryuk_api.main:app --host 0.0.0.0 --port 8000
+```
+
+---
+
+## 8. **API Documentation**
+
+### 8.1. **Authentication Endpoints**
+
+#### **Register User**
+```http
+POST /api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "securepassword",
+  "full_name": "John Doe"
+}
+```
+
+#### **Login User**
+```http
+POST /api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "user@example.com",
+  "password": "securepassword"
+}
+
+Response:
+{
+  "access_token": "jwt-token-here",
+  "token_type": "bearer"
+}
+```
+
+### 8.2. **Course Management**
+
+#### **Create New Course**
+```http
+POST /api/v1/courses/
+Authorization: Bearer {jwt-token}
+Content-Type: application/json
+
+{
+  "topic": "Machine Learning Fundamentals",
+  "difficulty": "beginner",
+  "goal": "Build ML models from scratch"
+}
+```
+
+#### **Get User Courses**
+```http
+GET /api/v1/courses/
+Authorization: Bearer {jwt-token}
+```
+
+#### **Get Course Details**
+```http
+GET /api/v1/courses/{course_id}
+Authorization: Bearer {jwt-token}
+```
+
+---
+
+## 9. **Recent Bug Fixes & Improvements**
+
+### 9.1. **Authentication System**
+- ✅ Fixed JWT token storage and retrieval
+- ✅ Added auto-login after registration
+- ✅ Implemented central error handling
+- ✅ Removed toast notifications in favor of modal system
+
+### 9.2. **Code Quality**
+- ✅ Fixed all TypeScript errors with Next.js 15 Promise params
+- ✅ Removed unused imports and variables
+- ✅ Updated error handling from `any` to proper types
+- ✅ Fixed ESLint warnings for React hooks
+
+### 9.3. **UI/UX Enhancements**
+- ✅ Implemented "Architect's Canvas" design system
+- ✅ Added smooth animations with framer-motion
+- ✅ Created unified login/register flow
+- ✅ Enhanced visual feedback for user actions
+
+---
+
+## 10. **Future Roadmap**
+
+### 10.1. **Short-term Goals**
+- [ ] Add comprehensive unit tests
+- [ ] Implement user profile management
+- [ ] Add course progress tracking
+- [ ] Enhance mobile responsiveness
+
+### 10.2. **Long-term Vision**
+- [ ] Implement real-time collaboration features
+- [ ] Add AI-powered content recommendations
+- [ ] Create mobile applications (React Native)
+- [ ] Implement advanced analytics dashboard
+
+---
+
+## 11. **Contributing Guidelines**
+
+### 11.1. **Code Style**
+- Follow TypeScript strict mode
+- Use ESLint configuration provided
+- Implement proper error boundaries
+- Add JSDoc comments for complex functions
+
+### 11.2. **Git Workflow**
+- Use conventional commits
+- Create feature branches from main
+- Add descriptive PR titles and descriptions
+- Include screenshots for UI changes
+
+---
+
+**Last Updated:** 25 Juli 2025, 23:35 WIB  
+**Document Version:** 2.0 - Post Architect's Canvas Update  
