@@ -196,3 +196,39 @@
   }
 }
 
+/* Architect's Canvas - Blueprint Grid Theme */
+.auth-canvas-background {
+  background: #F8F9FA;
+  background-image: 
+    linear-gradient(rgba(79, 70, 229, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 70, 229, 0.1) 1px, transparent 1px);
+  background-size: 40px 40px;
+  min-height: 100vh;
+  width: 100%;
+  animation: blueprintGrid 30s linear infinite;
+}
+
+@keyframes blueprintGrid {
+  0% { background-position: 0 0; }
+  100% { background-position: 40px 40px; }
+}
+
+/* Indigo theme variables for auth */
+:root {
+  --auth-primary: #4F46E5;
+  --auth-primary-light: #6366F1;
+  --auth-primary-dark: #4338CA;
+  --auth-text-primary: #111827;
+  --auth-text-secondary: #6B7280;
+  --auth-bg: #F8F9FA;
+  --auth-surface: #FFFFFF;
+  --auth-border: #E5E7EB;
+}
+
+/* Responsive background adjustments */
+@media (max-width: 768px) {
+  .auth-canvas-background {
+    background-size: 60px 60px;
+    animation-duration: 20s;
+  }
+}
