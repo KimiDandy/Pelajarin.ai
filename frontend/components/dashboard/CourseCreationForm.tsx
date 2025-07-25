@@ -38,8 +38,9 @@ export default function CourseCreationForm({ onCourseCreated }: CourseCreationFo
       setGoal('');
       // Notify parent component to refetch courses
       onCourseCreated();
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.detail || 'Gagal membuat kursus. Silakan coba lagi.';
+    } catch (error: Error | unknown) {
+      console.error('Error creating course:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Gagal membuat kursus. Silakan coba lagi.';
       toast.error(errorMessage, { id: loadingToast });
     } finally {
       setIsLoading(false);

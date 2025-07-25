@@ -10,33 +10,43 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 
 interface CourseDetailPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default function CourseDetailPage({ params }: CourseDetailPageProps) {
   const [course, setCourse] = useState<CourseDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [courseId, setCourseId] = useState<string>('');
+
+  useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setCourseId(resolvedParams.id);
+    };
+    resolveParams();
+  }, [params]);
 
   const fetchCourseDetails = useCallback(async () => {
-    if (!params.id) return;
+    if (!courseId) return;
     try {
-      const data = await courseService.getCourseById(params.id as string);
+      const data = await courseService.getCourseById(courseId);
       console.log('--- DEBUG: Data Received from API ---', data);
       setCourse(data);
-    } catch (err: any) {
-      setError(err.message || 'Gagal memuat detail kursus. Mungkin tidak ditemukan atau Anda tidak memiliki izin.');
+    } catch (err: Error | unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Gagal memuat detail kursus. Mungkin tidak ditemukan atau Anda tidak memiliki izin.';
+      setError(errorMessage);
       console.error(err);
     } finally {
       setIsLoading(false);
     }
-  }, [params.id]);
+  }, [courseId]);
 
   useEffect(() => {
-    if (params.id) {
+    if (courseId) {
       fetchCourseDetails();
     }
-  }, [params.id, fetchCourseDetails]);
+  }, [courseId, fetchCourseDetails]);
 
   if (isLoading) {
     return (
