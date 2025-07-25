@@ -3,9 +3,13 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { User, Mail, Lock, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { authService } from '@/services/authService';
 import { Button } from '@/components/ui/Button';
+import { AuthInput } from '@/components/auth/AuthInput';
+import { validateEmail, validatePassword, validateName } from '@/lib/authValidation';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -30,63 +34,133 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="bg-white/5 p-8 rounded-2xl border border-white/10 shadow-xl backdrop-blur-lg">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="bg-card/60 backdrop-blur-xl border border-border/50 rounded-3xl p-8 md:p-10 shadow-2xl shadow-primary/10"
+    >
+      {/* Glowing accent border */}
+      <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-primary/20 via-transparent to-secondary/20 opacity-50 blur-xl -z-10" />
+      
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Buat Akun Baru</h1>
-        <p className="text-neutral-300 mt-2">Mulai perjalanan belajar Anda bersama kami.</p>
+        <motion.h1 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80"
+        >
+          Buat Akun Baru
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="text-neutral-300 mt-3 text-lg"
+        >
+          Mulai petualangan belajar yang bercahaya bersama kami!
+        </motion.p>
       </div>
+
       <form onSubmit={handleSubmit} className="w-full space-y-6">
-        <div>
-          <label htmlFor="fullName" className="block text-sm font-medium text-neutral-300 mb-2">Nama Lengkap (Opsional)</label>
-          <input
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+        >
+          <AuthInput
             id="fullName"
             name="fullName"
             type="text"
-            autoComplete="name"
-            disabled={isLoading}
+            placeholder="Nama lengkap Anda"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full px-4 py-3 border border-white/10 rounded-lg bg-white/5 text-foreground placeholder-neutral-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300 disabled:opacity-50"
+            disabled={isLoading}
+            autoComplete="name"
+            icon={<User className="w-5 h-5" />}
+            validate={validateName}
+            validationMessage="Nama hanya boleh berisi huruf dan spasi"
           />
-        </div>
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-neutral-300 mb-2">Email</label>
-          <input
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+        >
+          <AuthInput
             id="email"
             name="email"
             type="email"
-            autoComplete="email"
-            required
-            disabled={isLoading}
+            placeholder="email@domain.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 border border-white/10 rounded-lg bg-white/5 text-foreground placeholder-neutral-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300 disabled:opacity-50"
+            required
+            disabled={isLoading}
+            autoComplete="email"
+            icon={<Mail className="w-5 h-5" />}
+            validate={validateEmail}
+            validationMessage="Masukkan email yang valid"
           />
-        </div>
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-neutral-300 mb-2">Password</label>
-          <input
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+        >
+          <AuthInput
             id="password"
             name="password"
             type="password"
-            autoComplete="new-password"
-            required
-            disabled={isLoading}
+            placeholder="Minimal 8 karakter"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 border border-white/10 rounded-lg bg-white/5 text-foreground placeholder-neutral-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300 disabled:opacity-50"
+            required
+            disabled={isLoading}
+            autoComplete="new-password"
+            icon={<Lock className="w-5 h-5" />}
+            validate={validatePassword}
+            validationMessage="Password minimal 8 karakter dengan huruf dan angka"
           />
-        </div>
-        <Button type="submit" disabled={isLoading} className="w-full text-lg py-3 mt-4 transition-all duration-300 hover:shadow-[0_0_20px_hsl(var(--primary))]">
-          {isLoading ? 'Memproses...' : 'Buat Akun'}
-        </Button>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
+        >
+          <Button 
+            type="submit" 
+            disabled={isLoading} 
+            className="w-full text-lg py-4 mt-2 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--primary))] hover:shadow-primary/30"
+          >
+            {isLoading ? (
+              <span className="flex items-center justify-center">
+                <Loader2 className="animate-spin mr-2" size={20} />
+                Memproses...
+              </span>
+            ) : (
+              'Mulai Petualangan'
+            )}
+          </Button>
+        </motion.div>
       </form>
-      <p className="mt-8 text-center text-sm text-neutral-400">
+
+      <motion.p 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8, duration: 0.5 }}
+        className="mt-8 text-center text-sm text-neutral-400"
+      >
         Sudah punya akun?{' '}
-        <Link href="/login" className="font-medium text-primary hover:text-primary/80 transition-colors">
-          Masuk di sini
+        <Link 
+          href="/login" 
+          className="font-medium text-primary hover:text-primary/80 transition-colors hover:underline"
+        >
+          Masuk dan lanjutkan perjalananmu
         </Link>
-      </p>
-    </div>
+      </motion.p>
+    </motion.div>
   );
 }
