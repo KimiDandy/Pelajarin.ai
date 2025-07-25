@@ -46,7 +46,7 @@ const HowItWorksSection = () => {
   };
 
   return (
-    <section id="cara-kerja" className="py-24 bg-background relative overflow-hidden">
+    <section id="cara-kerja" className="py-20 relative">
       <div className="container mx-auto px-6">
         <motion.div 
           className="text-center mb-16"
@@ -83,31 +83,46 @@ const HowItWorksSection = () => {
                   {step.number}
                 </motion.div>
                 
-                {/* SVG Connector */}
+                {/* Enhanced SVG Connector with glowing effect */}
                 {index < steps.length - 1 && (
                   <motion.svg
-                    className="hidden md:block absolute top-1/2 -right-4 w-16 h-2 transform -translate-y-1/2"
-                    viewBox="0 0 64 8"
+                    className="hidden md:block absolute top-1/2 -right-4 w-16 h-4 transform -translate-y-1/2"
+                    viewBox="0 0 64 16"
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     transition={{ duration: 0.5, delay: index * 0.3 }}
                     viewport={{ once: true }}
                   >
+                    {/* Glowing path */}
                     <motion.path
-                      d="M 0 4 L 64 4"
-                      stroke="url(#gradient)"
-                      strokeWidth="2"
+                      d="M 0 8 L 64 8"
+                      stroke="url(#glowGradient)"
+                      strokeWidth="3"
                       fill="none"
-                      strokeDasharray="4 4"
-                      initial={{ pathLength: 0 }}
-                      whileInView={{ pathLength: 1 }}
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      whileInView={{ pathLength: 1, opacity: 1 }}
                       transition={{ duration: 1.5, delay: index * 0.3 }}
                       viewport={{ once: true }}
                     />
+                    {/* Flowing particle */}
+                    <motion.circle
+                      r="2"
+                      fill="hsl(var(--primary))"
+                      initial={{ cx: 0, opacity: 0 }}
+                      whileInView={{ cx: 64, opacity: [0, 1, 0] }}
+                      transition={{ 
+                        duration: 2, 
+                        delay: index * 0.3 + 1.5,
+                        repeat: Infinity,
+                        repeatDelay: 1
+                      }}
+                      viewport={{ once: true }}
+                    />
                     <defs>
-                      <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="hsl(var(--primary))" />
-                        <stop offset="100%" stopColor="hsl(var(--secondary))" />
+                      <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.8" />
+                        <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="1" />
+                        <stop offset="100%" stopColor="hsl(var(--secondary))" stopOpacity="0.8" />
                       </linearGradient>
                     </defs>
                   </motion.svg>

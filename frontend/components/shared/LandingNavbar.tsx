@@ -43,6 +43,14 @@ const LandingNavbar = () => {
               whileHover={{ scale: 1.1 }}
               transition={{ duration: 0.2 }}
             >
+              <Link href="#statistik" className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))] transition-colors duration-300 font-medium">
+                Statistik
+              </Link>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              transition={{ duration: 0.2 }}
+            >
               <Link href="#fitur" className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))] transition-colors duration-300 font-medium">
                 Fitur
               </Link>
@@ -51,16 +59,16 @@ const LandingNavbar = () => {
               whileHover={{ scale: 1.1 }}
               transition={{ duration: 0.2 }}
             >
-              <Link href="#cara-kerja" className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))] transition-colors duration-300 font-medium">
-                Cara Kerja
+              <Link href="#testimoni" className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))] transition-colors duration-300 font-medium">
+                Testimoni
               </Link>
             </motion.div>
             <motion.div
               whileHover={{ scale: 1.1 }}
               transition={{ duration: 0.2 }}
             >
-              <Link href="/login" className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))] transition-colors duration-300 font-medium">
-                Masuk
+              <Link href="#faq" className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))] transition-colors duration-300 font-medium">
+                FAQ
               </Link>
             </motion.div>
             <motion.div

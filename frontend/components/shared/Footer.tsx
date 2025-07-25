@@ -101,15 +101,18 @@ const Footer = () => {
           </motion.div>
         </div>
         
-        <motion.div 
-          className="border-t border-[hsl(var(--border))] pt-8 text-center"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.6 }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
           viewport={{ once: true }}
+          className="text-center pt-8 border-t border-[hsl(var(--border))]"
         >
-          <p className="text-sm text-[hsl(var(--muted-foreground))]">
+          <p className="text-sm text-[hsl(var(--muted-foreground))] mb-2">
             &copy; {new Date().getFullYear()} Pelajarin.ai. Hak cipta dilindungi.
+          </p>
+          <p className="text-sm bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--secondary))] bg-clip-text text-transparent">
+            Built by Kimi Dandy Yudanarko & Lina Liliana
           </p>
         </motion.div>
       </div>
