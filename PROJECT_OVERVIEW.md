@@ -1,6 +1,6 @@
 # Dokumentasi Teknis Proyek Pelajarin.ai
 
-**Tanggal Dokumen:** 24 Juli 2025
+**Tanggal Dokumen:** 25 Juli 2025
 
 ## 1. Ringkasan Proyek
 
@@ -37,6 +37,8 @@ Dokumen ini berfungsi sebagai sumber kebenaran tunggal (`single source of truth`
   - `tailwind-merge` & `clsx`: Untuk penggabungan kelas utilitas.
 - **HTTP Client:** Axios
 - **Notifikasi:** `react-hot-toast`
+- **Render Markdown:** `react-markdown`
+- **Styling Tipografi:** `@tailwindcss/typography`
 - **Manajemen Dependensi:** npm
 
 ---
@@ -187,7 +189,27 @@ Fitur inti dari Pelajarin.ai adalah sistem pembuatan kurikulum berbasis AI yang 
 
 ---
 
-## 5. Rincian Frontend
+## 5. Keputusan Arsitektural & Deviasi Penting
+
+Selama pengembangan, beberapa keputusan teknis diambil yang sedikit berbeda dari rencana awal. Keputusan ini krusial untuk mengatasi tantangan teknis, memastikan stabilitas, dan meningkatkan kualitas produk.
+
+### 5.1. Backend: Logika Serialisasi Data (ORM ke Pydantic)
+
+-   **Masalah Awal:** Terjadi `ValidationError` yang persisten dan sulit di-debug saat mencoba mengonversi objek SQLAlchemy (yang memiliki relasi bertingkat seperti `course -> modules -> sub_topics`) menjadi skema Pydantic (`CourseDetail`). Penggunaan `__dict__` pada objek ORM dan dekorator `@field_validator` atau `@computed_field` di Pydantic terbukti tidak stabil dan rawan error karena menyertakan atribut internal SQLAlchemy (`_sa_instance_state`).
+-   **Solusi & Deviasi:** Logika transformasi data dipindahkan sepenuhnya dari level skema Pydantic ke level *router endpoint* (`/routers/course_router.py`). Di dalam endpoint `GET /{course_id}`, data dibangun secara manual menjadi struktur `dict` sebelum dikembalikan. Pendekatan ini, meskipun lebih verbose, memberikan kontrol penuh atas data yang diekspos oleh API, menghilangkan semua `ValidationError`, dan memastikan respons yang konsisten dan dapat diandalkan.
+
+### 5.2. Frontend: Refactor UI/UX Halaman Detail Kurikulum
+
+-   **Masalah Awal:** Tampilan awal halaman detail kurikulum terlalu lebar, deskripsi kursus tidak terformat dengan baik, dan daftar sub-topik bersifat statis, sehingga pengalaman pengguna terasa kurang optimal.
+-   **Solusi & Deviasi:** Dilakukan perombakan UI/UX yang signifikan:
+    1.  **Rendering Deskripsi dengan Markdown:** Implementasi `react-markdown` dengan plugin `@tailwindcss/typography` (`prose`). Ini memungkinkan deskripsi yang dihasilkan AI (yang seringkali mengandung format Markdown) untuk di-render dengan benar, lengkap dengan paragraf, daftar, dan penekanan teks yang estetis.
+    2.  **Layout Proporsional:** Lebar kontainer utama dibatasi dengan `max-w-5xl` agar lebih fokus dan nyaman dibaca di layar besar.
+    3.  **Navigasi Sub-Topik Interaktif:** Setiap item sub-topik diubah dari teks statis menjadi komponen `<Link>` interaktif dengan *hover effects* dan ikon yang jelas. Ini memberikan *affordance* (petunjuk visual) yang kuat bahwa setiap sub-topik adalah materi yang dapat dieksplorasi.
+    4.  **Konsistensi Tombol Aksi:** Semua tombol *call-to-action* (Mulai Kuis, Mulai Ujian) distandarisasi menggunakan gradien warna primer (`bg-gradient-primary`) dan ikonografi interaktif untuk menciptakan pengalaman visual yang kohesif dan profesional.
+
+---
+
+## 6. Rincian Frontend
 
 ### 5.1. Arsitektur & Styling
 

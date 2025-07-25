@@ -2,10 +2,24 @@ import React from 'react';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative flex items-center justify-center min-h-screen bg-background">
-      <div className="absolute inset-0 bg-gradient-abstract opacity-50" />
-      <div className="relative z-10 w-full max-w-md p-8 space-y-8 bg-card rounded-xl shadow-xl border border-border/50">
-        {children}
+    <div className="grid grid-cols-1 md:grid-cols-2 min-h-screen">
+      {/* Kolom Kiri: Visual Branding */}
+      <div className="hidden md:flex flex-col items-center justify-center p-12 bg-gradient-to-br from-primary/30 via-background to-background border-r border-white/10">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-300">
+            Pelajarin.ai
+          </h1>
+          <p className="mt-4 text-lg text-neutral-300 max-w-sm">
+            Satu langkah lagi untuk membuka potensi belajar tak terbatas dengan kekuatan AI.
+          </p>
+        </div>
+      </div>
+
+      {/* Kolom Kanan: Form Container */}
+      <div className="flex items-center justify-center p-6 md:p-12 bg-background/80 backdrop-blur-sm">
+        <div className="w-full max-w-md">
+          {children}
+        </div>
       </div>
     </div>
   );
