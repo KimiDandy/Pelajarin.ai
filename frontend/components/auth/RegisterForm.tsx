@@ -13,9 +13,10 @@ import { authUtils } from '@/lib/auth';
 interface RegisterFormProps {
   onSuccess: () => void;
   onSwitchToLogin: () => void;
+  onError: (error: string) => void;
 }
 
-export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) {
+export default function RegisterForm({ onSuccess, onSwitchToLogin, onError }: RegisterFormProps) {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -91,11 +92,10 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
       // Store the token using auth utility
       authUtils.setToken(loginResponse.access_token);
       
-      toast.success('Registrasi berhasil! Anda akan diarahkan ke dashboard.');
       onSuccess();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Registrasi gagal. Silakan coba lagi.';
-      toast.error(errorMessage);
+      onError(errorMessage);
     } finally {
       setIsLoading(false);
     }
