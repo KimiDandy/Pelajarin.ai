@@ -1,27 +1,27 @@
 'use client';
 
-import { BeakerIcon, BookOpenIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { Sparkles, FlaskConical, BookOpen } from 'lucide-react';
 import FeatureCard from './FeatureCard';
 import { motion } from 'framer-motion';
 
 const features = [
   {
-    icon: <SparklesIcon className="h-8 w-8" />,
+    icon: <Sparkles className="h-8 w-8 text-[hsl(var(--primary))]" />,
     title: 'Struktur Otomatis',
     description: 'Dapatkan peta jalan belajar yang logis dan terstruktur secara otomatis, dari dasar hingga mahir.',
-    color: '#4361EE',
+    color: 'primary',
   },
   {
-    icon: <BeakerIcon className="h-8 w-8" />,
+    icon: <FlaskConical className="h-8 w-8 text-[hsl(var(--secondary))]" />,
     title: 'Personalisasi Mendalam',
     description: 'Kurikulum dibuat khusus untuk Anda, menyesuaikan dengan tingkat keahlian dan tujuan belajar Anda.',
-    color: '#7209B7',
+    color: 'secondary',
   },
   {
-    icon: <BookOpenIcon className="h-8 w-8" />,
+    icon: <BookOpen className="h-8 w-8 text-[hsl(var(--accent))]" />,
     title: 'Pembelajaran Interaktif',
     description: 'Materi yang kaya visual dan kuis interaktif untuk menjaga Anda tetap terlibat dan termotivasi.',
-    color: '#F0F2F5',
+    color: 'accent',
   },
 ];
 
@@ -48,7 +48,7 @@ const FeaturesSection = () => {
   };
 
   return (
-    <section id="fitur" className="py-24 bg-background relative">
+    <section id="fitur" className="py-20 bg-background relative">
       <div className="container mx-auto px-6">
         <motion.div 
           className="text-center mb-16"
@@ -57,10 +57,10 @@ const FeaturesSection = () => {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-[#F0F2F5] mb-4 text-glow">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--secondary))] bg-clip-text text-transparent">
             Mengapa Memilih Pelajarin.ai?
           </h2>
-          <p className="text-lg text-[#A0AEC0] max-w-2xl mx-auto">
+          <p className="text-lg text-[hsl(var(--muted-foreground))] max-w-2xl mx-auto">
             Platform kami dirancang untuk membuat belajar menjadi lebih efisien dan menyenangkan.
           </p>
         </motion.div>

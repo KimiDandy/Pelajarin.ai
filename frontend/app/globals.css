@@ -53,8 +53,16 @@
   }
   
   .aurora-bg {
-    background: radial-gradient(ellipse at top, hsl(var(--glow-primary)/0.1) 0%, transparent 50%),
-                radial-gradient(ellipse at bottom, hsl(var(--glow-secondary)/0.1) 0%, transparent 50%);
+    background: linear-gradient(
+      135deg,
+      hsl(var(--background)) 0%,
+      hsl(270 20% 10%) 25%,
+      hsl(180 20% 15%) 50%,
+      hsl(300 20% 10%) 75%,
+      hsl(var(--background)) 100%
+    );
+    background-size: 400% 400%;
+    animation: aurora 20s ease-in-out infinite;
   }
   
   .sheen-animation {
@@ -65,18 +73,18 @@
   .sheen-animation::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
     background: linear-gradient(
-      45deg,
-      transparent 30%,
-      hsl(var(--glow-primary)/0.3) 50%,
-      transparent 70%
+      90deg,
+      transparent,
+      hsl(var(--glow-secondary) / 0.4),
+      transparent
     );
-    transform: translateX(-100%) translateY(-100%) rotate(45deg);
-    animation: sheen 3s infinite;
+    transition: left 0.5s ease;
+    animation: sheen 2s infinite;
   }
   
   @keyframes sheen {
@@ -98,6 +106,92 @@
     }
     to {
       box-shadow: 0 0 40px hsl(var(--glow-primary)/0.6), 0 0 60px hsl(var(--glow-secondary)/0.3);
+    }
+  }
+
+  /* Cinematic gradient transitions */
+  .cinematic-transition {
+    position: relative;
+  }
+
+  .cinematic-transition::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      hsl(var(--background) / 0.1) 50%,
+      hsl(var(--background)) 100%
+    );
+    pointer-events: none;
+  }
+
+  .cinematic-transition-top::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(
+      to top,
+      transparent 0%,
+      hsl(var(--background) / 0.1) 50%,
+      hsl(var(--background)) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Scroll-responsive background lighting */
+  .scroll-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+      circle at 50% 50%,
+      hsl(var(--glow-primary) / 0.1) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+    z-index: -1;
+    transition: all 0.3s ease;
+    animation: scrollGlow 8s ease-in-out infinite;
+  }
+
+  @keyframes scrollGlow {
+    0%, 100% {
+      background: radial-gradient(
+        circle at 20% 20%,
+        hsl(var(--glow-primary) / 0.15) 0%,
+        transparent 60%
+      );
+    }
+    25% {
+      background: radial-gradient(
+        circle at 80% 30%,
+        hsl(var(--glow-secondary) / 0.15) 0%,
+        transparent 60%
+      );
+    }
+    50% {
+      background: radial-gradient(
+        circle at 50% 80%,
+        hsl(var(--glow-primary) / 0.2) 0%,
+        transparent 60%
+      );
+    }
+    75% {
+      background: radial-gradient(
+        circle at 30% 70%,
+        hsl(var(--glow-secondary) / 0.15) 0%,
+        transparent 60%
+      );
     }
   }
 }

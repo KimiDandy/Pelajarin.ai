@@ -46,7 +46,7 @@ const HowItWorksSection = () => {
   };
 
   return (
-    <section id="cara-kerja" className="py-24 bg-background relative overflow-hidden">
+    <section id="cara-kerja" className="py-20 relative">
       <div className="container mx-auto px-6">
         <motion.div 
           className="text-center mb-16"
@@ -55,80 +55,99 @@ const HowItWorksSection = () => {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-[#F0F2F5] mb-4 text-glow">
+          <h2 className="text-4xl md:text-5xl font-bold text-[hsl(var(--foreground))] mb-4 text-glow">
             Hanya Butuh 3 Langkah Mudah
           </h2>
-          <p className="text-lg text-[#A0AEC0]">Mulai perjalanan belajar Anda dalam hitungan menit.</p>
+          <p className="text-lg text-[hsl(var(--muted-foreground))]">Mulai perjalanan belajar Anda dalam hitungan menit.</p>
         </motion.div>
         
-        <div className="relative">
-          {/* Animated connecting line */}
-          <motion.div 
-            className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-[#4361EE] via-[#7209B7] to-[#4361EE]"
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            transition={{ duration: 1.5, delay: 0.5 }}
-            viewport={{ once: true }}
-            style={{ transformOrigin: 'left' }}
-          />
-          
-          <motion.div 
-            className="relative grid grid-cols-1 md:grid-cols-3 gap-12"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            {steps.map((step, index) => (
-              <motion.div key={step.number} variants={itemVariants} className="relative">
+        <motion.div 
+          className="relative flex flex-col md:flex-row items-start justify-center space-y-12 md:space-y-0 md:space-x-8 max-w-6xl mx-auto"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          {steps.map((step, index) => (
+            <motion.div 
+              key={step.number} 
+              variants={itemVariants} 
+              className="flex-1 flex flex-col items-center text-center relative"
+            >
+              <div className="relative mb-6">
                 <motion.div 
-                  className="text-center glass-card rounded-2xl p-8 group hover:border-[#4361EE]/50 transition-all duration-300"
-                  whileHover={{ y: -10 }}
+                  className="w-20 h-20 rounded-full bg-gradient-to-br from-[hsl(var(--primary))] to-[hsl(var(--secondary))] flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-[hsl(var(--glow-primary)/0.3)] glow-border"
+                  whileHover={{ scale: 1.1, rotate: 360 }}
+                  transition={{ duration: 0.5 }}
                 >
-                  <motion.div 
-                    className="flex items-center justify-center mb-6"
-                    whileHover={{ scale: 1.1, rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    <div 
-                      className="relative flex items-center justify-center h-24 w-24 rounded-full border-2 font-bold text-2xl text-glow"
-                      style={{ 
-                        borderColor: step.color,
-                        color: step.color,
-                        boxShadow: `0 0 30px ${step.color}40, inset 0 0 30px ${step.color}20`
-                      }}
-                    >
-                      {step.number}
-                      <motion.div
-                        className="absolute inset-0 rounded-full"
-                        style={{ 
-                          background: `radial-gradient(circle, ${step.color}20 0%, transparent 70%)`,
-                        }}
-                        animate={{
-                          scale: [1, 1.2, 1],
-                          opacity: [0.5, 0.8, 0.5],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                      />
-                    </div>
-                  </motion.div>
-                  
-                  <h3 className="text-2xl font-bold text-[#F0F2F5] mb-3 group-hover:text-glow transition-all duration-300">
-                    {step.title}
-                  </h3>
-                  
-                  <p className="text-[#A0AEC0] leading-relaxed">
-                    {step.description}
-                  </p>
+                  {step.number}
                 </motion.div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
+                
+                {/* Enhanced SVG Connector with glowing effect */}
+                {index < steps.length - 1 && (
+                  <motion.svg
+                    className="hidden md:block absolute top-1/2 -right-4 w-16 h-4 transform -translate-y-1/2"
+                    viewBox="0 0 64 16"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: index * 0.3 }}
+                    viewport={{ once: true }}
+                  >
+                    {/* Glowing path */}
+                    <motion.path
+                      d="M 0 8 L 64 8"
+                      stroke="url(#glowGradient)"
+                      strokeWidth="3"
+                      fill="none"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      whileInView={{ pathLength: 1, opacity: 1 }}
+                      transition={{ duration: 1.5, delay: index * 0.3 }}
+                      viewport={{ once: true }}
+                    />
+                    {/* Flowing particle */}
+                    <motion.circle
+                      r="2"
+                      fill="hsl(var(--primary))"
+                      initial={{ cx: 0, opacity: 0 }}
+                      whileInView={{ cx: 64, opacity: [0, 1, 0] }}
+                      transition={{ 
+                        duration: 2, 
+                        delay: index * 0.3 + 1.5,
+                        repeat: Infinity,
+                        repeatDelay: 1
+                      }}
+                      viewport={{ once: true }}
+                    />
+                    <defs>
+                      <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.8" />
+                        <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="1" />
+                        <stop offset="100%" stopColor="hsl(var(--secondary))" stopOpacity="0.8" />
+                      </linearGradient>
+                    </defs>
+                  </motion.svg>
+                )}
+              </div>
+              
+              <motion.h3 
+                className="text-xl font-bold text-[hsl(var(--foreground))] mb-3"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.2 }}
+              >
+                {step.title}
+              </motion.h3>
+              
+              <motion.p 
+                className="text-[hsl(var(--muted-foreground))] leading-relaxed max-w-xs"
+                initial={{ opacity: 0.7 }}
+                whileHover={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                {step.description}
+              </motion.p>
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
     </section>
   );
