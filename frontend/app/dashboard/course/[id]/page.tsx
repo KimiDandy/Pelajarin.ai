@@ -51,9 +51,45 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <FiLoader className="mx-auto h-12 w-12 text-teal-400 animate-spin" />
-        <p className="mt-4 text-white text-shadow-subtle">Memuat detail kurikulum...</p>
+      <div className="max-w-5xl mx-auto">
+        <div className="bg-black/20 backdrop-blur-lg border border-teal-400/20 rounded-lg shadow-lg p-8">
+          {/* Title skeleton */}
+          <div className="h-10 bg-gradient-to-r from-teal-400/10 to-purple-400/10 rounded-lg animate-pulse mb-4 w-3/4"></div>
+          <div className="h-6 bg-gradient-to-r from-teal-400/5 to-purple-400/5 rounded-lg animate-pulse mb-8 w-full"></div>
+          
+          {/* Description skeleton */}
+          <div className="space-y-3 mb-8">
+            <div className="h-4 bg-gradient-to-r from-teal-400/5 to-purple-400/5 rounded-lg animate-pulse w-full"></div>
+            <div className="h-4 bg-gradient-to-r from-teal-400/5 to-purple-400/5 rounded-lg animate-pulse w-5/6"></div>
+            <div className="h-4 bg-gradient-to-r from-teal-400/5 to-purple-400/5 rounded-lg animate-pulse w-4/6"></div>
+          </div>
+
+          {/* Learning outcomes skeleton */}
+          <div className="mb-10">
+            <div className="h-8 bg-gradient-to-r from-teal-400/10 to-purple-400/10 rounded-lg animate-pulse mb-5 w-1/3"></div>
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-start">
+                  <div className="w-5 h-5 bg-teal-400/20 rounded-full animate-pulse mr-3 mt-0.5 flex-shrink-0"></div>
+                  <div className="h-4 bg-gradient-to-r from-teal-400/5 to-purple-400/5 rounded-lg animate-pulse w-full"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Curriculum skeleton */}
+          <div>
+            <div className="h-8 bg-gradient-to-r from-teal-400/10 to-purple-400/10 rounded-lg animate-pulse mb-5 w-1/4"></div>
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-black/10 border border-teal-400/10 rounded-lg p-4">
+                  <div className="h-6 bg-gradient-to-r from-teal-400/10 to-purple-400/10 rounded-lg animate-pulse mb-3 w-1/2"></div>
+                  <div className="h-4 bg-gradient-to-r from-teal-400/5 to-purple-400/5 rounded-lg animate-pulse w-3/4"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
