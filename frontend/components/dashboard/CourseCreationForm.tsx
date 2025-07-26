@@ -2,8 +2,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { courseService } from '@/services/courseService';
-import { CourseCreatePayload } from '@/types/course';
+import { CourseCreatePayload, Course } from '@/types/course';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/Button';
 
@@ -15,7 +16,76 @@ export default function CourseCreationForm({ onCourseCreated }: CourseCreationFo
   const [topic, setTopic] = useState('');
   const [difficulty, setDifficulty] = useState('pemula');
   const [goal, setGoal] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
+
+  const createCourseMutation = useMutation({
+    mutationFn: (payload: CourseCreatePayload) => courseService.createCourse(payload),
+    onMutate: async (payload) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['courses'] });
+
+      // Snapshot the previous value
+      const previousCourses = queryClient.getQueryData(['courses']);
+
+      // Create optimistic course
+      const optimisticCourse: Course = {
+        id: `optimistic-${Date.now()}`,
+        title: payload.topic,
+        description: `Kursus tentang ${payload.topic} sedang dibuat oleh AI...`,
+        status: 'generating',
+        created_at: new Date().toISOString(),
+        progress: 0,
+      };
+
+      // Optimistically update the cache
+      queryClient.setQueryData(['courses'], (old: Course[] = []) => [optimisticCourse, ...old]);
+
+      // Return context for rollback
+      return { previousCourses };
+    },
+    onError: (error: any, variables: any, context: any) => {
+      // Rollback optimistic update on error
+      queryClient.setQueryData(['courses'], context.previousCourses);
+      
+      // Provide specific error messages based on error type
+      let errorMessage = 'Gagal membuat kursus. Silakan coba lagi.';
+      
+      if (error?.response?.status === 400) {
+        const errorDetail = error.response.data?.detail;
+        if (errorDetail?.includes('prompt injection') || errorDetail?.includes('tidak valid')) {
+          errorMessage = `Topik yang Anda masukkan mengandung kata yang tidak diizinkan. Harap gunakan topik yang lebih spesifik.`;
+        } else if (errorDetail?.includes('terlalu umum') || errorDetail?.includes('too general')) {
+          errorMessage = `Topik terlalu umum. Coba gunakan topik yang lebih spesifik seperti "${topic} untuk pemula" atau "${topic} dasar".`;
+        } else {
+          errorMessage = errorDetail || 'Topik tidak valid. Harap periksa input Anda.';
+        }
+      } else if (error?.response?.status === 500) {
+        errorMessage = 'Terjadi kesalahan server. Silakan coba beberapa saat lagi.';
+      } else {
+        errorMessage = error instanceof Error ? error.message : 'Gagal membuat kursus. Silakan coba lagi.';
+      }
+      
+      toast.error(errorMessage, {
+        duration: 5000,
+        style: {
+          maxWidth: '400px',
+        },
+      });
+    },
+    onSuccess: () => {
+      toast.success('Permintaan berhasil! Kursus Anda sedang dibuat oleh AI.');
+      // Reset form
+      setTopic('');
+      setDifficulty('pemula');
+      setGoal('');
+      // Notify parent (though QueryClient handles the refetch)
+      onCourseCreated();
+    },
+    onSettled: () => {
+      // Always refetch to ensure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -24,27 +94,8 @@ export default function CourseCreationForm({ onCourseCreated }: CourseCreationFo
       return;
     }
 
-    setIsLoading(true);
-    const loadingToast = toast.loading('Membuat permintaan kursus...');
-
     const payload: CourseCreatePayload = { topic, difficulty, goal };
-
-    try {
-      await courseService.createCourse(payload);
-      toast.success('Permintaan berhasil! Kursus Anda sedang dibuat oleh AI.', { id: loadingToast });
-      // Reset form
-      setTopic('');
-      setDifficulty('pemula');
-      setGoal('');
-      // Notify parent component to refetch courses
-      onCourseCreated();
-    } catch (error: Error | unknown) {
-      console.error('Error creating course:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Gagal membuat kursus. Silakan coba lagi.';
-      toast.error(errorMessage, { id: loadingToast });
-    } finally {
-      setIsLoading(false);
-    }
+    createCourseMutation.mutate(payload);
   };
 
   return (
@@ -96,10 +147,10 @@ export default function CourseCreationForm({ onCourseCreated }: CourseCreationFo
         <div className="pt-4">
           <button
             type="submit"
-            disabled={isLoading}
-            className="w-full gradient-accent text-white font-medium py-3 px-4 rounded-lg shadow-lg glow-shadow-teal hover:glow-shadow-teal-hover transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={createCourseMutation.isPending || !topic.trim()}
+            className="w-full bg-gradient-to-r from-primary-teal to-primary-purple text-white font-semibold py-3 px-6 rounded-lg hover:shadow-lg hover:shadow-primary-teal/25 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Sedang Memproses...' : 'Buat Kursus dengan AI'}
+            {createCourseMutation.isPending ? 'Membuat Kursus...' : 'Buat Kursus Sekarang'}
           </button>
         </div>
       </form>

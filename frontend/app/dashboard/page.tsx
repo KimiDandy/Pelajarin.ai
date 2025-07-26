@@ -1,75 +1,37 @@
 // d:/Portofolio/Project/pelajarin.ai/frontend/app/dashboard/page.tsx
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import { courseService } from '@/services/courseService';
 import { Course } from '@/types/course';
 import CourseCard from '@/components/dashboard/CourseCard';
 import CourseRow from '@/components/dashboard/CourseRow';
 import EmptyState from '@/components/dashboard/EmptyState';
 import StatsWidgetPanel from '@/components/dashboard/StatsWidgetPanel';
-import { FiLoader } from 'react-icons/fi';
+import { QueryStateHandler } from '@/components/shared/QueryStateHandler';
 
 export default function DashboardPage() {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const coursesQuery = useQuery<Course[], Error>({
+    queryKey: ['courses'],
+    queryFn: courseService.getCourses,
+    staleTime: 5000, // Consider data fresh for 5 seconds
+    refetchInterval: (data) => {
+      // Only poll if there are generating courses
+      const hasGeneratingCourses = data?.state.data?.some((c: Course) => c.status === 'generating');
+      return hasGeneratingCourses ? 5000 : false;
+    },
+  });
 
-  const fetchCourses = useCallback(async () => {
-    try {
-      const data = await courseService.getCourses();
-      // Sort courses by creation date, newest first
-      data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      setCourses(data);
-    } catch (error: Error | unknown) {
-      console.error('Error fetching courses:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Gagal memuat kursus.';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchCourses();
-  }, [fetchCourses]);
-
-  // Polling mechanism to update status of 'generating' courses
-  useEffect(() => {
-    const hasGeneratingCourses = courses.some(c => c.status === 'generating');
-
-    if (!hasGeneratingCourses) {
-      return; // No need to poll if nothing is generating
-    }
-
-    const interval = setInterval(() => {
-      console.log('Polling for course status updates...');
-      fetchCourses();
-    }, 5000); // Poll every 5 seconds
-
-    return () => clearInterval(interval); // Cleanup on component unmount
-  }, [courses, fetchCourses]);
+  // React Query handles polling automatically via refetchInterval
 
   const handleCourseCreated = () => {
-    // No need to set loading, just refetch
-    fetchCourses();
+    // Trigger refetch when new course is created
+    coursesQuery.refetch();
   };
 
-  const renderContent = (view: 'grid' | 'list') => {
-    if (isLoading && courses.length === 0) {
-      return (
-        <div className="text-center py-10">
-          <FiLoader className="mx-auto h-12 w-12 text-gray-500 animate-spin" />
-          <p className="mt-4 text-gray-600">Memuat kursus Anda...</p>
-        </div>
-      );
-    }
-
-    if (error) {
-      return <div className="text-center py-10 text-red-600">Error: {error}</div>;
-    }
-
+  const renderContent = (view: 'grid' | 'list', courses: Course[]) => {
     if (courses.length === 0) {
       return <EmptyState />;
     }
@@ -120,7 +82,7 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <StatsWidgetPanel courses={courses} />
+      <StatsWidgetPanel courses={coursesQuery.data || []} />
       
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -151,7 +113,14 @@ export default function DashboardPage() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
       >
-        {renderContent(view)}
+        <QueryStateHandler query={coursesQuery}>
+          {(courses) => {
+            const sorted = [...courses].sort(
+              (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            );
+            return renderContent(view, sorted);
+          }}
+        </QueryStateHandler>
       </motion.div>
     </div>
   );
