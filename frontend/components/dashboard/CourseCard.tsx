@@ -70,10 +70,11 @@ export default function CourseCard({ course, view }: CourseCardProps) {
 
   return (
     <motion.div
+      layoutId={`course-card-${course.id}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-white rounded-lg shadow-sm hover:glow-shadow-teal transition-all duration-300 transform hover:-translate-y-1"
+      className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg glow-shadow-teal hover:glow-shadow-teal-hover transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
     >
       <Link href={`/dashboard/course/${course.id}`}>
         <div className="p-6">
@@ -103,7 +104,7 @@ export default function CourseCard({ course, view }: CourseCardProps) {
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <motion.div 
-                  className="bg-gradient-to-r from-teal-500 to-sky-500 h-2 rounded-full"
+                  className="bg-gradient-to-r from-primary-teal to-secondary-sky h-2 rounded-full"
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.8, delay: 0.2 }}

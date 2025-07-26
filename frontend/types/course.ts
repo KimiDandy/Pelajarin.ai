@@ -55,6 +55,7 @@ export interface Course {
   description: string;
   status: 'generating' | 'completed' | 'failed';
   created_at: string; // ISO 8601 date string
+  progress?: number; // Frontend tracking for progress (0-100)
 }
 
 /**

@@ -2,10 +2,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { courseService } from '@/services/courseService';
 import { Course } from '@/types/course';
 import CourseCard from '@/components/dashboard/CourseCard';
+import CourseRow from '@/components/dashboard/CourseRow';
 import EmptyState from '@/components/dashboard/EmptyState';
 import StatsWidgetPanel from '@/components/dashboard/StatsWidgetPanel';
 import { FiLoader } from 'react-icons/fi';
@@ -75,20 +76,41 @@ export default function DashboardPage() {
 
     if (view === 'grid') {
       return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map((course) => (
-            <CourseCard key={course.id} course={course} view="grid" />
-          ))}
-        </div>
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          <AnimatePresence>
+            {courses.map((course, index) => (
+              <motion.div
+                key={course.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 + index * 0.1 }}
+              >
+                <CourseCard course={course} view="grid" />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       );
     }
 
     return (
-      <div className="space-y-4">
-        {courses.map((course) => (
-          <CourseCard key={course.id} course={course} view="list" />
-        ))}
-      </div>
+      <motion.div
+        className="space-y-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
+        <AnimatePresence>
+          {courses.map((course, index) => (
+            <CourseRow key={course.id} course={course} />
+          ))}
+        </AnimatePresence>
+      </motion.div>
     );
   };
 
