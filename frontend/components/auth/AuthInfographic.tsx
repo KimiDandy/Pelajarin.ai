@@ -85,7 +85,7 @@ export default function AuthInfographic() {
       <div className="space-y-4">
         {features.map((feature, index) => (
           <motion.div
-            key={feature.title}
+            key={`${feature.title}-${index}`}
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
