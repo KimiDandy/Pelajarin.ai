@@ -137,13 +137,14 @@ def get_courses_by_user(db: Session, user_id: UUID) -> List[Course]:
 
 def get_course_details_by_id(db: Session, course_id: UUID, user_id: UUID) -> Course:
     """Retrieves a single course with all its details, ensuring user ownership."""
+    from sqlalchemy.orm import selectinload
+    
     return (
         db.query(Course)
         .options(
-            # Use subqueryload for one-to-many relationships to avoid cartesian product
-            subqueryload(Course.modules).subqueryload(Module.sub_topics),
-            # Use joinedload for assessments as it's also a direct relationship
-            joinedload(Course.assessments)
+            # Use selectinload for better performance with PostgreSQL
+            selectinload(Course.modules).selectinload(Module.sub_topics),
+            selectinload(Course.assessments)
         )
         .filter(Course.id == course_id, Course.user_id == user_id)
         .first()
