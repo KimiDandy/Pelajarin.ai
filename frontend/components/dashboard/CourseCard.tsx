@@ -30,12 +30,25 @@ export default function CourseCard({ course, view }: CourseCardProps) {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3 }}
-        className="bg-white rounded-lg p-4 shadow-sm hover:glow-shadow-teal transition-all duration-300"
+        className="bg-white/70 backdrop-blur-md rounded-lg shadow-lg hover:shadow-lg hover:shadow-primary-teal/10 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
       >
         <Link href={`/dashboard/course/${course.id}`}>
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">{course.title}</h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-semibold text-gray-800">{course.title}</h3>
+                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                  course.status === 'completed' ? 'bg-status-completed text-white' :
+                  course.status === 'generating' ? 'bg-status-inprogress text-white' :
+                  course.status === 'failed' ? 'bg-red-500 text-white' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {course.status === 'completed' ? 'Selesai' :
+                   course.status === 'generating' ? 'Dalam Proses' :
+                   course.status === 'failed' ? 'Gagal' :
+                   'Draft'}
+                </span>
+              </div>
               <p className="text-gray-600 text-sm mb-2">{course.description}</p>
               
               <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -55,9 +68,9 @@ export default function CourseCard({ course, view }: CourseCardProps) {
             
             <div className="w-32 ml-4">
               <div className="text-sm font-medium text-gray-700 mb-1">{Math.round(progress)}%</div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-gray-300 rounded-full h-2">
                 <div 
-                  className="bg-gradient-to-r from-teal-500 to-sky-500 h-2 rounded-full transition-all duration-300"
+                  className="bg-gradient-to-r from-primary-teal to-secondary-sky h-2 rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -74,7 +87,7 @@ export default function CourseCard({ course, view }: CourseCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg glow-shadow-teal hover:glow-shadow-teal-hover transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
+      className="bg-white/70 backdrop-blur-md rounded-lg shadow-lg hover:shadow-lg hover:shadow-primary-teal/10 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
     >
       <Link href={`/dashboard/course/${course.id}`}>
         <div className="p-6">

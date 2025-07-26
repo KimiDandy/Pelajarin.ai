@@ -26,7 +26,7 @@ export default function DashboardHeader({ onCreateCourse }: DashboardHeaderProps
         
         <button
           onClick={onCreateCourse}
-          className="flex items-center gap-2 px-6 py-3 gradient-accent text-white rounded-lg shadow-lg glow-shadow-teal hover:glow-shadow-teal-hover transition-all duration-300 transform hover:-translate-y-0.5 font-medium"
+          className="gradient-accent text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg hover:shadow-primary-teal/25 transition-all duration-300 flex items-center gap-2 transform hover:-translate-y-0.5"
         >
           <FiPlus size={20} />
           Buat Kursus Baru
