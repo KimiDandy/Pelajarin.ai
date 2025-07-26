@@ -84,50 +84,39 @@ def read_course(
     if not course_orm:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    # 2. Manually and explicitly build the response dictionary from ORM objects.
-    # This is the most robust way to avoid validation errors.
-
-    # Extract learning outcomes from the JSONB field
+    # Optimized response building using Pydantic model validation
     learning_outcomes = (course_orm.full_blueprint or {}).get('learning_outcomes', [])
-
-    # Find and convert the final assessment
-    final_assessment_orm = next((a for a in course_orm.assessments if a.module_id is None), None)
-    final_assessment_data = AssessmentPublic.model_validate(final_assessment_orm, from_attributes=True) if final_assessment_orm else None
-
-    # Build the module list with deep conversion
-    modules_data = []
-    for module_orm in sorted(course_orm.modules, key=lambda m: m.module_order):
-        # Find and convert the assessment for this module
-        module_assessment_orm = next((a for a in course_orm.assessments if a.module_id == module_orm.id), None)
-        module_assessment_data = AssessmentPublic.model_validate(module_assessment_orm, from_attributes=True) if module_assessment_orm else None
-
-        # Convert sub-topics for this module
-        sub_topics_data = [
-            SubTopicPublic.model_validate(st, from_attributes=True) 
-            for st in sorted(module_orm.sub_topics, key=lambda s: s.sub_topic_order)
+    
+    # Build response using optimized approach
+    response_data = CourseDetail(
+        id=course_orm.id,
+        title=course_orm.title,
+        description=course_orm.description,
+        status=course_orm.status,
+        created_at=course_orm.created_at,
+        user_id=course_orm.user_id,
+        learning_outcomes=learning_outcomes,
+        final_assessment=AssessmentPublic.model_validate(
+            next((a for a in course_orm.assessments if a.module_id is None), None), 
+            from_attributes=True
+        ) if any(a.module_id is None for a in course_orm.assessments) else None,
+        modules=[
+            {
+                'id': module_orm.id,
+                'title': module_orm.title,
+                'module_order': module_orm.module_order,
+                'sub_topics': [
+                    SubTopicPublic.model_validate(st, from_attributes=True)
+                    for st in sorted(module_orm.sub_topics, key=lambda s: s.sub_topic_order)
+                ],
+                'assessment': AssessmentPublic.model_validate(
+                    next((a for a in course_orm.assessments if a.module_id == module_orm.id), None),
+                    from_attributes=True
+                ) if any(a.module_id == module_orm.id for a in course_orm.assessments) else None
+            }
+            for module_orm in sorted(course_orm.modules, key=lambda m: m.module_order)
         ]
-
-        # Assemble the dictionary for the module
-        modules_data.append({
-            'id': module_orm.id,
-            'title': module_orm.title,
-            'module_order': module_orm.module_order,
-            'sub_topics': sub_topics_data,
-            'assessment': module_assessment_data
-        })
-
-    # 3. Assemble the final dictionary for the entire course
-    response_data = {
-        'id': course_orm.id,
-        'title': course_orm.title,
-        'description': course_orm.description,
-        'status': course_orm.status,
-        'created_at': course_orm.created_at,
-        'user_id': course_orm.user_id,
-        'learning_outcomes': learning_outcomes,
-        'final_assessment': final_assessment_data,
-        'modules': modules_data
-    }
+    )
 
     # 4. Validate the pure dictionary. This should now pass without errors.
     return CourseDetail.model_validate(response_data)

@@ -56,8 +56,13 @@ def generate_and_populate_course(db: Session, course_id: UUID, course_create_dat
             goal=course_create_data.goal
         )
     except HTTPException as e:
-        # Re-raise the exception from the AI service to be caught by the router
-        raise e
+        # Handle AI rejection gracefully - update course status to failed
+        course_to_fail = db.query(Course).filter(Course.id == course_id).first()
+        if course_to_fail:
+            course_to_fail.status = 'failed'
+            course_to_fail.description = f"Kurikulum tidak dapat dibuat: {e.detail.get('reason', 'Topik tidak sesuai')}"
+            db.commit()
+        return  # Exit gracefully - don't propagate exception in background task
 
     # Step 2: Run an atomic database transaction to save the blueprint
     try:
@@ -137,14 +142,43 @@ def get_courses_by_user(db: Session, user_id: UUID) -> List[Course]:
 
 def get_course_details_by_id(db: Session, course_id: UUID, user_id: UUID) -> Course:
     """Retrieves a single course with all its details, ensuring user ownership."""
-    return (
+    from sqlalchemy.orm import selectinload
+    from belajaryuk_api.services.redis_service import redis_service
+    
+    # Check Redis cache first
+    cached_data = redis_service.get_course_detail(course_id, user_id)
+    if cached_data:
+        # Return cached course object (ORM object simulation)
+        return (
+            db.query(Course)
+            .options(
+                selectinload(Course.modules).selectinload(Module.sub_topics),
+                selectinload(Course.assessments)
+            )
+            .filter(Course.id == course_id, Course.user_id == user_id)
+            .first()
+        )
+    
+    # Cache miss - fetch from database
+    course = (
         db.query(Course)
         .options(
-            # Use subqueryload for one-to-many relationships to avoid cartesian product
-            subqueryload(Course.modules).subqueryload(Module.sub_topics),
-            # Use joinedload for assessments as it's also a direct relationship
-            joinedload(Course.assessments)
+            selectinload(Course.modules).selectinload(Module.sub_topics),
+            selectinload(Course.assessments)
         )
         .filter(Course.id == course_id, Course.user_id == user_id)
         .first()
     )
+    
+    if course:
+        # Cache the result (5 minutes TTL)
+        redis_service.set_course_detail(course_id, user_id, {
+            'id': str(course.id),
+            'title': course.title,
+            'description': course.description,
+            'status': course.status,
+            'created_at': str(course.created_at),
+            'user_id': str(course.user_id)
+        })
+    
+    return course
