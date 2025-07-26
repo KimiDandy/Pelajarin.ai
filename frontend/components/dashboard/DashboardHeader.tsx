@@ -8,10 +8,10 @@ interface DashboardHeaderProps {
 
 export default function DashboardHeader({ onCreateCourse }: DashboardHeaderProps) {
   return (
-    <div className="flex items-center justify-between mb-8">
+    <div className="flex justify-between items-center mb-8 bg-transparent">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-600 mt-1">Kelola dan pantau perjalanan belajar Anda</p>
+        <h1 className="text-2xl font-bold text-gray-900">Kokpit Pengetahuan</h1>
+        <p className="text-gray-600">Kelola dan pantau semua kursus Anda</p>
       </div>
       
       <div className="flex items-center gap-4">
@@ -26,9 +26,9 @@ export default function DashboardHeader({ onCreateCourse }: DashboardHeaderProps
         
         <button
           onClick={onCreateCourse}
-          className="flex items-center gap-2 px-4 py-2 gradient-accent text-white rounded-lg hover:glow-shadow-teal-hover transition-all duration-300"
+          className="flex items-center gap-2 px-6 py-3 gradient-accent text-white rounded-lg shadow-lg glow-shadow-teal hover:glow-shadow-teal-hover transition-all duration-300 transform hover:-translate-y-0.5 font-medium"
         >
-          <FiPlus size={18} />
+          <FiPlus size={20} />
           Buat Kursus Baru
         </button>
       </div>

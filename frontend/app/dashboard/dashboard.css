@@ -1,0 +1,39 @@
+/* Knowledge Cockpit - Premium Dashboard Theme */
+
+.dashboard-background {
+  background-color: #F8F9FC;
+  background-image: radial-gradient(#E0E6F8 1px, transparent 1px);
+  background-size: 25px 25px;
+}
+
+/* Premium gradient utilities */
+.gradient-accent {
+  background: linear-gradient(135deg, #14B8A6 0%, #06B6D4 100%);
+}
+
+.glow-shadow-teal {
+  box-shadow: 0 4px 15px rgba(20, 184, 166, 0.1);
+}
+
+.glow-shadow-teal-hover:hover {
+  box-shadow: 0 8px 25px rgba(20, 184, 166, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Smooth transitions */
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+/* Status colors */
+.status-completed {
+  background-color: #10B981;
+}
+
+.status-inprogress {
+  background-color: #F59E0B;
+}
+
+.status-new {
+  background-color: #6B7280;
+}

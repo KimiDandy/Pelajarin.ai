@@ -24,6 +24,11 @@ export default {
           foreground: 'hsl(var(--secondary-foreground))',
         },
         card: 'hsl(var(--card))',
+        'primary-teal': '#14B8A6',
+        'secondary-sky': '#06B6D4',
+        'status-completed': '#10B981',
+        'status-inprogress': '#F59E0B',
+        'status-new': '#6B7280',
       },
       backgroundImage: {
         'gradient-primary': 'linear-gradient(to right, #14B8A6, #06B6D4)',

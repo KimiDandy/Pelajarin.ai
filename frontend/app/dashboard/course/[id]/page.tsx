@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { courseService } from '@/services/courseService';
 import { CourseDetail } from '@/types/course';
 import CurriculumAccordion from '@/components/course/CurriculumAccordion';
@@ -74,9 +75,15 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
   }
 
   return (
-    <div className="max-w-5xl">
-      <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">{course.title}</h1>
+    <motion.div
+      layoutId={`course-card-${course.id}`}
+      className="max-w-5xl"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4 }}
+    >
+      <div className="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">{course.title}</h1>
         <div className="prose prose-invert max-w-none text-gray-300 mb-8">
           <ReactMarkdown>{course.description}</ReactMarkdown>
         </div>
@@ -120,6 +127,6 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
