@@ -74,7 +74,7 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
   }
 
   return (
-    <main className="container mx-auto px-4 py-8 max-w-5xl">
+    <div className="max-w-5xl">
       <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-8">
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">{course.title}</h1>
         <div className="prose prose-invert max-w-none text-gray-300 mb-8">
@@ -120,6 +120,6 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }
