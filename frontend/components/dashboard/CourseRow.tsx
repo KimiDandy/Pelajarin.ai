@@ -28,28 +28,18 @@ export default function CourseRow({ course }: CourseRowProps) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
       transition={{ duration: 0.3 }}
-      className="bg-white/70 backdrop-blur-md rounded-lg shadow-sm hover:shadow-lg hover:shadow-primary-teal/10 transition-all duration-300"
+      className="bg-black/20 backdrop-blur-lg border border-teal-400/20 rounded-lg shadow-lg hover:border-teal-400/40 hover:shadow-teal-400/10 transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer p-4"
     >
       <Link href={`/dashboard/course/${course.id}`}>
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-800 mb-1">{course.title}</h3>
-            <p className="text-gray-600 text-sm mb-2">{course.description}</p>
-            
-            <div className="flex items-center gap-4 text-sm text-gray-500">
-              <div className="flex items-center gap-1">
-                <FiClock size={14} />
-                <span>Est. 8 jam</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <FiBook size={14} />
-                <span>5 modul</span>
-              </div>
-              <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                course.status === 'completed' ? 'bg-status-completed text-white' :
-                course.status === 'generating' ? 'bg-status-inprogress text-white' :
-                course.status === 'failed' ? 'bg-red-500 text-white' :
-                'bg-gray-100 text-gray-800'
+        <div className="flex items-center justify-between gap-6">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold text-white text-shadow-subtle truncate pr-4">{course.title}</h3>
+              <span className={`px-3 py-1.5 text-xs font-medium rounded-full text-shadow-subtle ${
+                course.status === 'completed' ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30' :
+                course.status === 'generating' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
+                course.status === 'failed' ? 'bg-red-500/20 text-red-300 border border-red-500/30' :
+                'bg-gray-500/20 text-gray-300 border border-gray-500/30'
               }`}>
                 {course.status === 'completed' ? 'Selesai' :
                  course.status === 'generating' ? 'Dalam Proses' :
@@ -57,21 +47,35 @@ export default function CourseRow({ course }: CourseRowProps) {
                  'Draft'}
               </span>
             </div>
+            <p className="text-gray-300 text-sm mb-3 text-shadow-subtle line-clamp-2">{course.description}</p>
+            
+            <div className="flex items-center gap-6 text-sm">
+              <div className="flex items-center gap-2 text-gray-300">
+                <FiClock size={16} className="text-teal-400" />
+                <span className="text-shadow-subtle">Est. 8 jam</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-300">
+                <FiBook size={16} className="text-purple-400" />
+                <span className="text-shadow-subtle">5 modul</span>
+              </div>
+            </div>
           </div>
           
-          <div className="flex items-center gap-4 ml-4">
-            <div className="w-32">
-              <div className="text-sm font-medium text-gray-700 mb-1">{Math.round(progress)}%</div>
-              <div className="w-full bg-gray-300 rounded-full h-2">
-                <div 
-                  className="bg-gradient-to-r from-primary-teal to-secondary-sky h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                ></div>
+          <div className="flex items-center gap-4 flex-shrink-0">
+            <div className="w-40">
+              <div className="text-sm font-medium text-gray-300 mb-2 text-shadow-subtle text-right">{Math.round(progress)}%</div>
+              <div className="w-full bg-gray-700/50 rounded-full h-2 overflow-hidden">
+                <motion.div 
+                  className="bg-gradient-to-r from-teal-400 to-purple-400 h-2 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                />
               </div>
             </div>
             
             <div className="text-right">
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-400 text-shadow-subtle">
                 {Math.round(progress * 5 / 100)}/5 selesai
               </span>
             </div>

@@ -52,17 +52,17 @@ export default function StatsWidgetPanel({ courses }: StatsWidgetPanelProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
-          className="floating-card rounded-lg hover:shadow-xl hover:shadow-primary-teal/20 transition-all duration-300"
+          className="bg-black/20 backdrop-blur-lg border border-teal-400/20 rounded-lg shadow-lg hover:border-teal-400/40 transition-all duration-300 transform hover:-translate-y-1"
         >
           <div className="flex items-center p-4">
             <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white ${
-              index % 2 === 0 ? 'bg-primary-teal' : 'bg-secondary-sky'
+              index % 2 === 0 ? 'bg-teal-400/80' : 'bg-purple-400/80'
             }`}>
               <stat.icon size={24} />
             </div>
             <div className="ml-4">
-              <p className="text-sm text-gray-700 mb-1">{stat.title}</p>
-              <p className="text-2xl font-bold text-gray-800">
+              <p className="text-sm text-gray-300 mb-1 text-shadow-subtle">{stat.title}</p>
+              <p className="text-2xl font-bold text-white text-shadow-subtle">
                 {stat.value}{stat.suffix}
               </p>
             </div>
