@@ -2,13 +2,14 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { courseService } from '@/services/courseService';
 import { Course } from '@/types/course';
-import CourseCreationForm from '@/components/dashboard/CourseCreationForm';
 import CourseCard from '@/components/dashboard/CourseCard';
+import CourseRow from '@/components/dashboard/CourseRow';
 import EmptyState from '@/components/dashboard/EmptyState';
-import { FiLoader, FiLogOut } from 'react-icons/fi';
-import { authUtils } from '@/lib/auth';
+import StatsWidgetPanel from '@/components/dashboard/StatsWidgetPanel';
+import { FiLoader } from 'react-icons/fi';
 
 export default function DashboardPage() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -55,44 +56,103 @@ export default function DashboardPage() {
     fetchCourses();
   };
 
-  const renderContent = () => {
+  const renderContent = (view: 'grid' | 'list') => {
     if (isLoading && courses.length === 0) {
       return (
         <div className="text-center py-10">
           <FiLoader className="mx-auto h-12 w-12 text-gray-500 animate-spin" />
-          <p className="mt-4 text-white">Memuat kursus Anda...</p>
+          <p className="mt-4 text-gray-600">Memuat kursus Anda...</p>
         </div>
       );
     }
 
     if (error) {
-      return <div className="text-center py-10 text-red-400">Error: {error}</div>;
+      return <div className="text-center py-10 text-red-600">Error: {error}</div>;
+    }
+
+    if (courses.length === 0) {
+      return <EmptyState />;
+    }
+
+    if (view === 'grid') {
+      return (
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          <AnimatePresence>
+            {courses.map((course, index) => (
+              <motion.div
+                key={course.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 + index * 0.1 }}
+              >
+                <CourseCard course={course} view="grid" />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
+      );
     }
 
     return (
-      <div>
-        <h2 className="text-xl font-bold text-white mb-4">Kursus Anda</h2>
-        {courses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {courses.map((course) => (
-              <CourseCard key={course.id} course={course} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState />
-        )}
-      </div>
+      <motion.div
+        className="space-y-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
+        <AnimatePresence>
+          {courses.map((course, index) => (
+            <CourseRow key={course.id} course={course} />
+          ))}
+        </AnimatePresence>
+      </motion.div>
     );
   };
 
-  const handleLogout = () => {
-    authUtils.logout();
-  };
+
+
+  const [view, setView] = useState<'grid' | 'list'>('grid');
 
   return (
     <div>
-      <CourseCreationForm onCourseCreated={handleCourseCreated} />
-      {renderContent()}
+      <StatsWidgetPanel courses={courses} />
+      
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="flex justify-between items-center mb-6"
+      >
+        <h2 className="text-xl font-bold text-gray-900">Kursus Anda</h2>
+        
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setView('grid')}
+            className={`p-2 rounded transition-colors ${view === 'grid' ? 'bg-teal-500 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
+          >
+            Grid
+          </button>
+          <button
+            onClick={() => setView('list')}
+            className={`p-2 rounded transition-colors ${view === 'list' ? 'bg-teal-500 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
+          >
+            List
+          </button>
+        </div>
+      </motion.div>
+      
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
+        {renderContent(view)}
+      </motion.div>
     </div>
   );
 }

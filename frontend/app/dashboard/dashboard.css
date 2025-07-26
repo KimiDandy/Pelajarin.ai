@@ -1,0 +1,35 @@
+/* Knowledge Cockpit - Premium Dashboard Theme */
+
+/* Floating Card Styles */
+.floating-card {
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Premium Gradient Accent */
+.gradient-accent {
+  background: linear-gradient(135deg, #14B8A6 0%, #06B6D4 100%);
+}
+
+/* Glow Shadows */
+.glow-shadow-teal {
+  box-shadow: 0 4px 14px 0 rgba(20, 184, 166, 0.15);
+}
+
+.glow-shadow-teal-hover {
+  box-shadow: 0 8px 25px 0 rgba(20, 184, 166, 0.25);
+}
+
+/* Status Colors */
+.status-completed {
+  background-color: #10B981;
+}
+
+.status-inprogress {
+  background-color: #F59E0B;
+}
+
+.status-new {
+  background-color: #6B7280;
+}

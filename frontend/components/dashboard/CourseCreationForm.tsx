@@ -48,19 +48,19 @@ export default function CourseCreationForm({ onCourseCreated }: CourseCreationFo
   };
 
   return (
-    <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-6 mb-8">
-      <h2 className="text-2xl font-bold mb-4 text-white">Belajar Sesuai Keinginanmu</h2>
-      <p className="text-gray-400 mb-6">Ketik saja apa yang ingin kamu pelajari. Biarkan AI kami yang merancang kurikulum terbaik untukmu.</p>
+    <div>
+      <h2 className="text-2xl font-bold mb-2 text-gray-900">Belajar Sesuai Keinginanmu</h2>
+      <p className="text-gray-600 mb-6">Ketik saja apa yang ingin kamu pelajari. Biarkan AI kami yang merancang kurikulum terbaik untukmu.</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="topic" className="block text-sm font-medium text-gray-300 mb-1">Topik Pembelajaran</label>
+          <label htmlFor="topic" className="block text-sm font-medium text-gray-700 mb-2">Topik Pembelajaran</label>
           <input
             type="text"
             id="topic"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            className="w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-primary-teal/50 focus:border-primary-teal transition-colors"
             placeholder="Contoh: 'Dasar-dasar Javascript untuk Web'"
             required
           />
@@ -68,12 +68,12 @@ export default function CourseCreationForm({ onCourseCreated }: CourseCreationFo
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="difficulty" className="block text-sm font-medium text-gray-300 mb-1">Tingkat Kesulitan</label>
+            <label htmlFor="difficulty" className="block text-sm font-medium text-gray-700 mb-2">Tingkat Kesulitan</label>
             <select
               id="difficulty"
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value)}
-              className="w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-primary-teal/50 focus:border-primary-teal transition-colors"
             >
               <option value="pemula">Pemula</option>
               <option value="menengah">Menengah</option>
@@ -81,22 +81,26 @@ export default function CourseCreationForm({ onCourseCreated }: CourseCreationFo
             </select>
           </div>
           <div>
-            <label htmlFor="goal" className="block text-sm font-medium text-gray-300 mb-1">Tujuan Spesifik (Opsional)</label>
+            <label htmlFor="goal" className="block text-sm font-medium text-gray-700 mb-2">Tujuan Spesifik (Opsional)</label>
             <input
               type="text"
               id="goal"
               value={goal}
               onChange={(e) => setGoal(e.target.value)}
-              className="w-full bg-gray-900 border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-primary-teal/50 focus:border-primary-teal transition-colors"
               placeholder="Contoh: 'Bisa membuat API sendiri'"
             />
           </div>
         </div>
 
-        <div className="pt-2">
-          <Button type="submit" disabled={isLoading} className="w-full">
+        <div className="pt-4">
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full gradient-accent text-white font-medium py-3 px-4 rounded-lg shadow-lg glow-shadow-teal hover:glow-shadow-teal-hover transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {isLoading ? 'Sedang Memproses...' : 'Buat Kursus dengan AI'}
-          </Button>
+          </button>
         </div>
       </form>
     </div>

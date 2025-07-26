@@ -27,48 +27,48 @@ export default function CurriculumAccordion({ modules, courseId }: CurriculumAcc
         <Accordion.Item
           key={module.id}
           value={`item-${module.id}`}
-          className="bg-gray-800/50 border border-gray-700 rounded-lg overflow-hidden"
+          className="bg-black/20 backdrop-blur-lg border border-teal-400/20 rounded-lg overflow-hidden hover:border-teal-400/30 transition-all duration-300"
         >
           <Accordion.Header>
-            <Accordion.Trigger className="flex justify-between items-center w-full p-4 text-left text-white font-semibold group hover:bg-gray-800/70 transition-colors">
-              <span>Modul {module.module_order}: {module.title}</span>
-              <FiChevronDown className="w-5 h-5 transition-transform duration-300 ease-[cubic-bezier(0.87,_0,_0.13,_1)] group-data-[state=open]:rotate-180" />
+            <Accordion.Trigger className="flex justify-between items-center w-full p-4 text-left text-white font-semibold group hover:bg-white/5 transition-colors">
+              <span className="text-shadow-subtle">Modul {module.module_order}: {module.title}</span>
+              <FiChevronDown className="w-5 h-5 text-teal-400 transition-transform duration-300 ease-[cubic-bezier(0.87,_0,_0.13,_1)] group-data-[state=open]:rotate-180" />
             </Accordion.Trigger>
           </Accordion.Header>
           <Accordion.Content className="overflow-hidden text-sm data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
             <div className="p-4 pt-0">
-              <ul className="space-y-2 pl-5 border-l-2 border-gray-600">
+              <ul className="space-y-2 pl-5 border-l-2 border-teal-400/30">
                 {module.sub_topics.map((subTopic) => (
                   <li key={subTopic.id}>
                     <Link 
                       href={`/dashboard/course/${courseId}/subtopic/${subTopic.id}`}
-                      className="flex items-center justify-between w-full text-left p-2 -ml-2 rounded-md hover:bg-gray-700/50 transition-colors group cursor-pointer"
+                      className="flex items-center justify-between w-full text-left p-2 -ml-2 rounded-md hover:bg-white/5 transition-colors group cursor-pointer"
                     >
                       <div className="flex items-start">
-                        <FiBookOpen className="w-5 h-5 text-gray-400 mr-4 mt-1 flex-shrink-0 group-hover:text-indigo-400 transition-colors" />
-                        <span className="text-gray-300 group-hover:text-white transition-colors">{subTopic.title}</span>
+                        <FiBookOpen className="w-5 h-5 text-teal-400 mr-4 mt-1 flex-shrink-0 group-hover:text-teal-300 transition-colors" />
+                        <span className="text-gray-300 group-hover:text-white transition-colors text-shadow-subtle">{subTopic.title}</span>
                       </div>
-                      <FiArrowRight className="w-4 h-4 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <FiArrowRight className="w-4 h-4 text-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </Link>
                   </li>
                 ))}
               </ul>
 
               {module.assessment && (
-                <div className="mt-6 pt-4 border-t border-gray-700/50">
-                  <div className="bg-gray-800/50 rounded-lg p-4 flex items-center justify-between">
+                <div className="mt-6 pt-4 border-t border-teal-400/20">
+                  <div className="bg-black/20 backdrop-blur-sm border border-teal-400/20 rounded-lg p-4 flex items-center justify-between">
                     <div className="flex items-center">
-                      <FiPlayCircle className="w-6 h-6 text-cyan-400 mr-4" />
+                      <FiPlayCircle className="w-6 h-6 text-teal-400 mr-4" />
                       <div>
-                        <h4 className="font-semibold text-white">{module.assessment.title}</h4>
-                        <p className="text-sm text-gray-400">Uji pemahaman Anda untuk modul ini.</p>
+                        <h4 className="font-semibold text-white text-shadow-subtle">{module.assessment.title}</h4>
+                        <p className="text-sm text-gray-300 text-shadow-subtle">Uji pemahaman Anda untuk modul ini.</p>
                       </div>
                     </div>
                     <button 
-                      className="group relative inline-flex items-center justify-center px-5 py-2 text-sm font-semibold text-white bg-gradient-primary rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 disabled:bg-none disabled:bg-gray-600 disabled:cursor-not-allowed disabled:shadow-none"
+                      className="group relative inline-flex items-center justify-center px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-teal-400 to-purple-400 rounded-lg hover:shadow-lg hover:shadow-teal-400/25 transition-all duration-300 disabled:bg-none disabled:bg-gray-600/50 disabled:text-gray-400 disabled:cursor-not-allowed disabled:shadow-none"
                       disabled
                     >
-                      <span>Mulai Kuis</span>
+                      <span className="text-shadow-subtle">Mulai Kuis</span>
                       <FiArrowRight className="w-4 h-4 ml-2 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"/>
                     </button>
                   </div>
