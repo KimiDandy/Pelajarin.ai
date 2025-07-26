@@ -1,13 +1,13 @@
 # Dokumentasi Teknis Proyek Pelajarin.ai
 
-**Tanggal Dokumen:** 25 Juli 2025 (Last Updated: 23:33 WIB)
+**Tanggal Dokumen:** 27 Juli 2025 (Last Updated: 00:25 WIB)
 
 ## 1. Ringkasan Proyek
 
 Pelajarin.ai adalah sebuah platform pembelajaran online berbasis AI yang dirancang untuk menghasilkan kursus secara dinamis. Proyek ini terdiri dari dua komponen utama: **backend** yang dibangun dengan FastAPI untuk mengelola data dan logika bisnis, dan **frontend** yang dibangun dengan Next.js untuk menyajikan antarmuka pengguna yang interaktif.
 
-### 🎯 **Milestone Terbaru: "Architect's Canvas" - Redesign Auth System**
-Proyek telah menyelesaikan transformasi besar pada sistem autentikasi dengan konsep "Architect's Canvas", menggantikan tema gelap sebelumnya dengan desain terang, profesional, dan terintegrasi.
+### 🎯 **Milestone Terbaru: "Nebula Cerdas" - Dashboard Cleanup & Documentation Update**
+Proyek telah menyelesaikan transformasi besar pada dashboard dengan konsep "Nebula Cerdas", menggantikan semua background legacy dengan desain nebula animasi menggunakan Framer Motion, dan melakukan cleanup komprehensif seluruh komponen frontend.
 
 Dokumen ini berfungsi sebagai sumber kebenaran tunggal (`single source of truth`) untuk semua aspek teknis proyek per tanggal yang disebutkan di atas.
 
@@ -93,11 +93,13 @@ frontend/
 │   │   ├── login/page.tsx  # Halaman login dengan AuthFlow
 │   │   └── register/page.tsx # Halaman register dengan AuthFlow
 │   ├── dashboard/          # Grup rute dashboard yang dilindungi
-│   │   ├── page.tsx        # Dashboard utama
+│   │   ├── page.tsx        # Dashboard utama dengan nebula background
+│   │   ├── layout.tsx      # Layout dashboard dengan SentientNebulaBackground
+│   │   ├── dashboard.css   # CSS khusus dashboard dengan glowing glass styling
 │   │   └── course/[id]/    # Detail kursus dengan Promise params
 │   ├── layout.tsx          # Layout root dengan blueprint grid background
 │   ├── page.tsx            # Landing page dengan "Luminous Mind" theme
-│   └── globals.css         # CSS global dengan animated blueprint grid
+│   └── globals.css         # CSS global dengan Luminous Mind variables & animations
 ├── components/
 │   ├── auth/               # Komponen autentikasi baru
 │   │   ├── AuthFlow.tsx    # Komponen utama login/register terpadu
@@ -108,10 +110,16 @@ frontend/
 │   │   ├── Navbar.tsx      # Navigasi utama
 │   │   ├── FloatingParticles.tsx # Efek partikel mengambang
 │   │   └── StatsSection.tsx # Statistik landing page
-│   ├── dashboard/          # Komponen dashboard
-│   │   └── CourseCreationForm.tsx # Form pembuatan kursus AI
+│   ├── dashboard/          # Komponen dashboard dengan nebula theme
+│   │   ├── SentientNebulaBackground.tsx # Background nebula animasi utama
+│   │   ├── DotGridBackground.tsx       # Background fallback dot grid
+│   │   ├── CourseCard.tsx              # Card kursus dengan glowing glass styling
+│   │   ├── CourseCreationForm.tsx      # Form pembuatan kursus dengan modal overlay
+│   │   └── DashboardLayout.tsx         # Layout dashboard dengan background management
 │   └── ui/                 # Komponen UI dasar dan atomik
-│       └── Button.tsx      # Komponen tombol reusable dengan CVA
+│       ├── Button.tsx      # Komponen tombol reusable dengan CVA
+│       ├── Card.tsx        # Card komponen dengan glass styling
+│       └── Modal.tsx       # Modal overlay untuk notifikasi
 ├── lib/
 │   ├── auth.ts             # Utilitas manajemen token JWT
 │   ├── authValidation.ts   # Validasi form autentikasi
@@ -121,6 +129,8 @@ frontend/
 │   ├── authService.ts      # Service autentikasi
 │   └── courseService.ts    # Service kursus
 ├── public/                 # Aset statis
+├── styles/                 # File CSS tambahan
+│   └── dashboard/          # CSS khusus untuk dashboard
 ├── tailwind.config.ts      # Konfigurasi Tailwind CSS v4
 ├── next.config.js          # Konfigurasi Next.js
 ├── tsconfig.json           # Konfigurasi TypeScript
@@ -254,6 +264,13 @@ Selama pengembangan, beberapa keputusan teknis diambil yang sedikit berbeda dari
 -   **Fix:** Error typing dari `any` ke `Error | unknown`
 -   **Optimasi:** Dependency array React hooks untuk menghilangkan warning ESLint
 
+### 5.6. **Dashboard Background Cleanup**
+
+-   **Masalah:** Background legacy (Aurora & Dot Grid) masih ada di dashboard
+-   **Solusi:** Implementasi `SentientNebulaBackground` dengan Framer Motion
+-   **Fix:** Hydration mismatch dengan deterministic SSR particles
+-   **Hasil:** Background nebula smooth tanpa jank atau visual legacy
+
 ---
 
 ## 6. Rincian Frontend
@@ -282,6 +299,12 @@ Selama pengembangan, beberapa keputusan teknis diambil yang sedikit berbeda dari
 - **`LoginForm.tsx`**: Form login dengan validasi real-time
 - **`RegisterForm.tsx`**: Form register dengan auto-login setelah registrasi
 
+#### **Dashboard Components**
+- **`SentientNebulaBackground.tsx`**: Background nebula animasi dengan Framer Motion
+- **`DotGridBackground.tsx`**: Background dot grid sebagai fallback
+- **`CourseCard.tsx`**: Card kursus dengan glowing glass styling
+- **`CourseCreationForm.tsx`**: Form pembuatan kursus dengan modal overlay
+
 #### **Sistem Notifikasi**
 - **Modal Overlay**: Menggantikan react-hot-toast dengan modal sentral
 - **Status Support**: Sukses (auto-dismiss) dan Error (manual close)
@@ -291,6 +314,11 @@ Selama pengembangan, beberapa keputusan teknis diambil yang sedikit berbeda dari
 - **`FloatingParticles.tsx`**: Partikel mengambang dengan motion values
 - **`InteractiveBackground.tsx`**: Background aurora dengan blueprint grid
 - **`StatsSection.tsx`**: Statistik platform dengan animasi counter
+
+#### **Dashboard Background System**
+- **`SentientNebulaBackground`**: Background utama dashboard dengan animasi gradient nebula
+- **`DotGridBackground`**: Background alternatif dengan pattern dot grid
+- **CSS Variables**: Luminous Mind color palette dengan teal (#00F5D4) dan violet (#9D4EDD) accents
 
 ### 6.3. **Dependencies Terbaru**
 
@@ -303,6 +331,7 @@ Selama pengembangan, beberapa keputusan teknis diambil yang sedikit berbeda dari
 - **Framer Motion**: `^12.0.0` untuk animasi halus
 - **React Spring**: Untuk efek partikel
 - **Lucide React**: Ikon modern dan konsisten
+- **CSS Custom Properties**: Luminous Mind theme variables
 
 #### **State Management & Auth**
 - **JWT Token Storage**: localStorage dengan key `access_token`
@@ -450,37 +479,96 @@ Authorization: Bearer {jwt-token}
 
 ---
 
+## 9. **Recent Updates & Changes**
+
+### 9.1. **"Nebula Cerdas" Dashboard Transformation**
+**Completed: 27 Juli 2025**
+
+#### **Background System Overhaul**
+- ✅ **SentientNebulaBackground.tsx**: New Framer Motion nebula background
+- ✅ **DotGridBackground.tsx**: Clean fallback background system
+- ✅ **Hydration Fix**: Resolved SSR/client mismatch with deterministic particles
+- ✅ **Performance**: Smooth 60fps animations without jank
+
+#### **CSS Architecture Update**
+- ✅ **dashboard.css**: Dedicated dashboard styling with glowing glass theme
+- ✅ **globals.css**: Updated with Luminous Mind color variables
+- ✅ **Utility Classes**: Added glow effects, glass cards, and animations
+- ✅ **Legacy Cleanup**: Removed all Aurora and dot grid legacy styles
+
+#### **Component Structure**
+- ✅ **CourseCard.tsx**: Glowing glass card design with teal/violet accents
+- ✅ **Modal System**: Overlay notifications replacing react-hot-toast
+- ✅ **Responsive Design**: Mobile-first approach for dashboard
+
+### 9.2. **Authentication System "Architect's Canvas"**
+**Completed: 26 Juli 2025**
+
+#### **UI/UX Transformation**
+- ✅ **Unified AuthFlow**: Single component for login/register
+- ✅ **Bright Theme**: Professional "Architect's Canvas" design
+- ✅ **Auto-login**: Seamless transition after registration
+- ✅ **Error Handling**: Centralized modal notifications
+
 ## 10. **Future Roadmap**
 
 ### 10.1. **Short-term Goals**
-- [ ] Add comprehensive unit tests
-- [ ] Implement user profile management
-- [ ] Add course progress tracking
-- [ ] Enhance mobile responsiveness
+- [ ] Add comprehensive unit tests for all components
+- [ ] Implement user profile management system
+- [ ] Add course progress tracking with visual indicators
+- [ ] Enhance mobile responsiveness for dashboard
+- [ ] Fix Tailwind CSS @apply warnings in globals.css
+- [ ] Add loading states for async operations
 
-### 10.2. **Long-term Vision**
+### 10.2. **Medium-term Goals**
+- [ ] Implement course search and filtering
+- [ ] Add course sharing functionality
+- [ ] Create user dashboard analytics
+- [ ] Add course completion certificates
+- [ ] Implement course ratings and reviews
+
+### 10.3. **Long-term Vision**
 - [ ] Implement real-time collaboration features
 - [ ] Add AI-powered content recommendations
 - [ ] Create mobile applications (React Native)
 - [ ] Implement advanced analytics dashboard
+- [ ] Add voice narration for courses
+- [ ] Implement offline mode capabilities
 
 ---
 
 ## 11. **Contributing Guidelines**
 
 ### 11.1. **Code Style**
-- Follow TypeScript strict mode
-- Use ESLint configuration provided
-- Implement proper error boundaries
-- Add JSDoc comments for complex functions
+- **TypeScript**: Strict mode enabled with noImplicitAny
+- **ESLint**: Use provided configuration with React hooks rules
+- **Error Boundaries**: Implement React ErrorBoundary for all major components
+- **JSDoc**: Add comprehensive comments for complex functions and hooks
+- **Naming**: Use descriptive variable names (camelCase for variables, PascalCase for components)
+- **File Structure**: One component per file, co-locate related utilities
+- **CSS**: Use Tailwind utility classes, avoid inline styles
+- **Performance**: Use React.memo for expensive components, optimize re-renders
 
 ### 11.2. **Git Workflow**
-- Use conventional commits
-- Create feature branches from main
-- Add descriptive PR titles and descriptions
-- Include screenshots for UI changes
+- **Conventional Commits**: Follow format `type(scope): description`
+- **Branch Naming**: `feature/nebula-cerdas`, `fix/hydration-issue`
+- **PR Requirements**: 
+  - Descriptive title and detailed description
+  - Screenshots/GIFs for UI changes
+  - Link to related issues
+  - Test coverage for new features
+- **Code Review**: Require 1 approval before merge
+- **Main Branch Protection**: No direct pushes, PR-only workflow
+
+### 11.3. **Development Best Practices**
+- **Component Design**: Atomic design principles (atoms, molecules, organisms)
+- **State Management**: Local state first, lift state up when necessary
+- **Testing**: Write tests for utilities and critical user flows
+- **Accessibility**: ARIA labels, keyboard navigation, color contrast
+- **Performance**: Lazy loading, code splitting, image optimization
+- **Security**: Input validation, XSS prevention, secure token storage
 
 ---
 
-**Last Updated:** 25 Juli 2025, 23:35 WIB  
+**Last Updated:** 27 Juli 2025, 00:27 WIB  
 **Document Version:** 2.0 - Post Architect's Canvas Update  
