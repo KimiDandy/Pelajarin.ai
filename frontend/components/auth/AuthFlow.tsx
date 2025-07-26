@@ -97,7 +97,9 @@ export default function AuthFlow({ initialView }: AuthFlowProps) {
           layout
           className="w-full lg:w-1/2 max-w-md"
         >
-          <AuthInfographic />
+          <div className="hidden lg:block">
+            <AuthInfographic />
+          </div>
         </motion.div>
       </div>
 
@@ -115,71 +117,70 @@ export default function AuthFlow({ initialView }: AuthFlowProps) {
         </div>
       )}
 
-      {/* Transition overlay */}
+      {/* Notification Modal */}
       <AnimatePresence>
-        {/* Notification Modal */}
-        <AnimatePresence>
-          {notification && (
+        {notification && (
+          <motion.div
+            key="notification-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setNotification(null)}
+          >
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-              onClick={() => setNotification(null)}
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 20 }}
+              className="bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full"
+              onClick={(e) => e.stopPropagation()}
             >
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.8, opacity: 0, y: 20 }}
-                className="bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="text-center">
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
-                    notification.type === 'success' 
-                      ? 'bg-gradient-to-br from-green-400 to-blue-500' 
-                      : notification.type === 'error'
-                      ? 'bg-gradient-to-br from-red-400 to-pink-500'
-                      : 'bg-gradient-to-br from-blue-400 to-indigo-500'
-                  }`}>
-                    {notification.type === 'success' && <CheckCircle className="w-8 h-8 text-white" />}
-                    {notification.type === 'error' && <XCircle className="w-8 h-8 text-white" />}
-                    {notification.type === 'info' && <AlertCircle className="w-8 h-8 text-white" />}
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{notification.title}</h3>
-                  <p className="text-gray-600 text-sm">{notification.message}</p>
+              <div className="text-center">
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                  notification.type === 'success' 
+                    ? 'bg-gradient-to-br from-green-400 to-blue-500' 
+                    : notification.type === 'error'
+                    ? 'bg-gradient-to-br from-red-400 to-pink-500'
+                    : 'bg-gradient-to-br from-blue-400 to-indigo-500'
+                }`}>
+                  {notification.type === 'success' && <CheckCircle className="w-8 h-8 text-white" />}
+                  {notification.type === 'error' && <XCircle className="w-8 h-8 text-white" />}
+                  {notification.type === 'info' && <AlertCircle className="w-8 h-8 text-white" />}
                 </div>
-              </motion.div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{notification.title}</h3>
+                <p className="text-gray-600 text-sm">{notification.message}</p>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* Transition Overlay */}
-        <AnimatePresence>
-          {isTransitioning && !notification && (
+      {/* Transition Overlay */}
+      <AnimatePresence>
+        {isTransitioning && !notification && (
+          <motion.div
+            key="transition-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-white/20 backdrop-blur-sm z-40 flex items-center justify-center"
+          >
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-white/20 backdrop-blur-sm z-40 flex items-center justify-center"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="bg-white rounded-2xl p-8 shadow-2xl"
             >
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                className="bg-white rounded-2xl p-8 shadow-2xl"
-              >
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                    <div className="w-4 h-4 bg-white rounded-full animate-bounce"></div>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Memproses...</h3>
-                  <p className="text-gray-600">Mohon tunggu sebentar</p>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                  <div className="w-4 h-4 bg-white rounded-full animate-bounce"></div>
                 </div>
-              </motion.div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Memproses...</h3>
+                <p className="text-gray-600">Mohon tunggu sebentar</p>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );

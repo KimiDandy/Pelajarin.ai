@@ -16,9 +16,11 @@ export default function CourseCard({ course, view }: CourseCardProps) {
   const progress = course.status === 'completed' ? 100 : 
                    course.status === 'generating' ? 0 : 0;
 
+  const isOptimistic = course.id.startsWith('optimistic-');
+  
   const statusInfo = {
     completed: { text: 'Selesai', color: 'bg-green-100 text-green-800', icon: FiCheckCircle },
-    generating: { text: 'Dalam Proses', color: 'bg-yellow-100 text-yellow-800', icon: FiClock },
+    generating: { text: isOptimistic ? 'Membuat...' : 'Dalam Proses', color: 'bg-yellow-100 text-yellow-800', icon: FiClock },
     new: { text: 'Baru', color: 'bg-gray-100 text-gray-800', icon: FiPlay }
   };
 
@@ -41,12 +43,12 @@ export default function CourseCard({ course, view }: CourseCardProps) {
                 <h3 className="text-lg font-semibold text-white text-shadow-subtle truncate pr-4">{course.title}</h3>
                 <span className={`px-3 py-1.5 text-xs font-medium rounded-full ${
                   course.status === 'completed' ? 'bg-green-500/80 text-white' :
-                  course.status === 'generating' ? 'bg-yellow-500/80 text-white' :
+                  course.status === 'generating' ? (isOptimistic ? 'bg-blue-500/80 text-white animate-pulse' : 'bg-yellow-500/80 text-white') :
                   course.status === 'failed' ? 'bg-red-500/80 text-white' :
                   'bg-gray-500/80 text-white'
                 } text-shadow-subtle`}>
                   {course.status === 'completed' ? 'Selesai' :
-                   course.status === 'generating' ? 'Dalam Proses' :
+                   course.status === 'generating' ? (isOptimistic ? 'Membuat...' : 'Dalam Proses') :
                    course.status === 'failed' ? 'Gagal' :
                    'Draft'}
                 </span>
@@ -101,14 +103,14 @@ export default function CourseCard({ course, view }: CourseCardProps) {
           <p className="text-gray-300 text-sm mb-4 line-clamp-3 text-shadow-subtle">{course.description}</p>
           
           <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm text-gray-300">
-              <div className="flex items-center gap-2">
-                <FiClock size={16} />
-                <span className="text-shadow-subtle">Est. 8 jam</span>
+            <div className="flex items-center gap-4 text-sm text-gray-400">
+              <div className="flex items-center gap-1">
+                <FiClock className="w-4 h-4" />
+                <span>{isOptimistic ? 'Baru saja' : new Date(course.created_at).toLocaleDateString('id-ID')}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <FiBook size={16} />
-                <span className="text-shadow-subtle">5 modul</span>
+              <div className="flex items-center gap-1">
+                <FiBook className="w-4 h-4" />
+                <span>{isOptimistic ? 'Sedang dibuat' : '0 modul'}</span>
               </div>
             </div>
             
