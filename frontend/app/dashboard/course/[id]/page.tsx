@@ -1,10 +1,9 @@
 // d:/Portofolio/Project/pelajarin.ai/frontend/app/dashboard/course/[id]/page.tsx
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { courseService } from '@/services/courseService';
-import { CourseDetail } from '@/types/course';
+import { useCourseDetail } from '@/hooks/useCourseQuery';
 import CurriculumAccordion from '@/components/course/CurriculumAccordion';
 import { FiLoader, FiAlertTriangle, FiCheckCircle, FiAward, FiArrowRight } from 'react-icons/fi';
 import Link from 'next/link';
@@ -15,9 +14,6 @@ interface CourseDetailPageProps {
 }
 
 export default function CourseDetailPage({ params }: CourseDetailPageProps) {
-  const [course, setCourse] = useState<CourseDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [courseId, setCourseId] = useState<string>('');
 
   useEffect(() => {
@@ -28,26 +24,7 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
     resolveParams();
   }, [params]);
 
-  const fetchCourseDetails = useCallback(async () => {
-    if (!courseId) return;
-    try {
-      const data = await courseService.getCourseById(courseId);
-      console.log('--- DEBUG: Data Received from API ---', data);
-      setCourse(data);
-    } catch (err: Error | unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Gagal memuat detail kursus. Mungkin tidak ditemukan atau Anda tidak memiliki izin.';
-      setError(errorMessage);
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [courseId]);
-
-  useEffect(() => {
-    if (courseId) {
-      fetchCourseDetails();
-    }
-  }, [courseId, fetchCourseDetails]);
+  const { data: course, isLoading, error } = useCourseDetail(courseId);
 
   if (isLoading) {
     return (
@@ -98,7 +75,7 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-red-400">
         <FiAlertTriangle className="mx-auto h-12 w-12" />
-        <p className="mt-4 text-shadow-subtle">Error: {error}</p>
+        <p className="mt-4 text-shadow-subtle">Error: {error instanceof Error ? error.message : 'Unknown error'}</p>
         <Link href="/dashboard" className="mt-4 px-4 py-2 bg-gradient-to-r from-teal-400 to-purple-400 text-white rounded-md hover:shadow-lg hover:shadow-teal-400/25 transition-all duration-300">
           Kembali ke Dasbor
         </Link>
@@ -128,7 +105,7 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
           <div className="mb-10">
             <h2 className="text-2xl font-bold text-white mb-5 text-shadow-subtle">Tujuan Pembelajaran</h2>
             <ul className="space-y-3">
-              {course.learning_outcomes.map((outcome, index) => (
+              {course.learning_outcomes.map((outcome: string, index: number) => (
                 <li key={index} className="flex items-start">
                   <FiCheckCircle className="w-5 h-5 text-teal-400 mr-3 mt-1 flex-shrink-0" />
                   <span className="text-gray-300 text-shadow-subtle">{outcome}</span>
