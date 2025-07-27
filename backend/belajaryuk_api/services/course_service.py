@@ -1,7 +1,10 @@
 # backend/belajaryuk_api/services/course_service.py
 
+import asyncio
+import json
+import logging
 from sqlalchemy.orm import Session, joinedload, subqueryload
-from typing import List
+from typing import List, Optional, Dict, Any
 from uuid import UUID
 from fastapi import HTTPException, status
 
@@ -12,8 +15,13 @@ from belajaryuk_api.models.sub_topic import SubTopic
 from belajaryuk_api.models.assessment import Assessment
 from belajaryuk_api.schemas.course_schema import CourseCreate
 from belajaryuk_api.services import ai_service
+from belajaryuk_api.utils.sse_broadcaster import broadcaster
+from belajaryuk_api.schemas.course_schema import CoursePublic
 
-def create_initial_course(db: Session, user: User, course_create_data: CourseCreate) -> Course:
+# Setup logger
+logger = logging.getLogger(__name__)
+
+async def create_initial_course(db: Session, user: User, course_create_data: CourseCreate) -> Course:
     """
     Creates an initial, placeholder course entry in the database.
     This function runs synchronously and returns immediately.
@@ -25,16 +33,19 @@ def create_initial_course(db: Session, user: User, course_create_data: CourseCre
         user_id=user.id,
         title=f"Kursus tentang {course_create_data.topic}", # Placeholder title
         description="Kurikulum sedang dibuat oleh AI...", # Placeholder description
+        difficulty=course_create_data.difficulty, # Save the difficulty
         status='generating', # Set initial status
         full_blueprint={}
     )
     db.add(new_course)
     db.commit()
     db.refresh(new_course)
+    
+    logger.info(f"Course '{new_course.title}' creation initiated. Status set to 'generating'. Course ID: {new_course.id}")
     return new_course
 
 
-def generate_and_populate_course(db: Session, course_id: UUID, course_create_data: CourseCreate):
+async def generate_and_populate_course(db: Session, course_id: UUID, course_create_data: CourseCreate):
     """
     This function runs in the background. It generates the full course content
     from the AI and populates the database.
@@ -62,6 +73,11 @@ def generate_and_populate_course(db: Session, course_id: UUID, course_create_dat
             course_to_fail.status = 'failed'
             course_to_fail.description = f"Kurikulum tidak dapat dibuat: {e.detail.get('reason', 'Topik tidak sesuai')}"
             db.commit()
+            logger.error(f"Course creation failed for course ID {course_id}. Status updated to 'failed'. Error: {e.detail.get('reason', 'Topik tidak sesuai')}")
+            await broadcaster.publish(
+                channel=f"user_{course_to_fail.user_id}_courses",
+                message=json.dumps({"event": "course_creation_failed", "data": CoursePublic.from_orm(course_to_fail).model_dump_json()})
+            )
         return  # Exit gracefully - don't propagate exception in background task
 
     # Step 2: Run an atomic database transaction to save the blueprint
@@ -116,38 +132,51 @@ def generate_and_populate_course(db: Session, course_id: UUID, course_create_dat
                 status='pending'
             ))
 
-        # Finally, update the status to 'completed'
-        course_to_populate.status = 'completed'
+        # Finally, update the status to 'blueprint_completed' to indicate blueprint is ready
+        course_to_populate.status = 'blueprint_completed'
         
         db.commit()
-        print(f"Successfully populated course ID: {course_id}")
+        db.refresh(course_to_populate)
+
+        logger.info(f"Blueprint for course '{course_to_populate.id}' successfully saved. Status updated to 'blueprint_completed'.")
+
+        # Broadcast that a new course is ready
+        course_data = CoursePublic.from_orm(course_to_populate).model_dump_json()
+        await broadcaster.publish(
+            channel=f"user_{course_to_populate.user_id}_courses",
+            message=json.dumps({"event": "course_blueprint_ready", "data": course_data})
+        )
 
     except Exception as e:
         db.rollback()
-        db.rollback()
         # In a background task, we should log the error but not raise HTTPException
         # as it won't be caught by the client. We also update the course status to 'failed'.
-        print(f"Background task failed for course ID {course_id}: {e}")
+        logger.error(f"Process failed for course ID {course_id}. Status updated to 'failed'. Error: {e}")
         course_to_fail = db.query(Course).filter(Course.id == course_id).first()
         if course_to_fail:
             course_to_fail.status = 'failed'
             course_to_fail.description = f"AI gagal membuat kurikulum: {e}"
             db.commit()
+            await broadcaster.publish(
+                channel=f"user_{course_to_fail.user_id}_courses",
+                message=json.dumps({"event": "course_creation_failed", "data": CoursePublic.from_orm(course_to_fail).model_dump_json()})
+            )
 
 
-def get_courses_by_user(db: Session, user_id: UUID) -> List[Course]:
+async def get_courses_by_user(db: Session, user_id: UUID) -> List[Course]:
     """Retrieves all courses belonging to a specific user."""
     return db.query(Course).filter(Course.user_id == user_id).order_by(Course.created_at.desc()).all()
 
 
-def get_course_details_by_id(db: Session, course_id: UUID, user_id: UUID) -> Course:
+async def get_course_details_by_id(db: Session, course_id: UUID, user_id: UUID) -> Course:
     """Retrieves a single course with all its details, ensuring user ownership."""
     from sqlalchemy.orm import selectinload
     from belajaryuk_api.services.redis_service import redis_service
     
     # Check Redis cache first
-    cached_data = redis_service.get_course_detail(course_id, user_id)
-    if cached_data:
+    cached_course = redis_service.get_course_detail(course_id, user_id)
+    # Validate cache: if the required 'difficulty' field is missing, treat as a cache miss.
+    if cached_course and 'difficulty' in cached_course:
         # Return cached course object (ORM object simulation)
         return (
             db.query(Course)
@@ -172,13 +201,176 @@ def get_course_details_by_id(db: Session, course_id: UUID, user_id: UUID) -> Cou
     
     if course:
         # Cache the result (5 minutes TTL)
+        # Cache the result, ensuring all required fields for CourseDetail are present
         redis_service.set_course_detail(course_id, user_id, {
             'id': str(course.id),
             'title': course.title,
             'description': course.description,
+            'difficulty': course.difficulty.value, # Add difficulty to cache
             'status': course.status,
             'created_at': str(course.created_at),
             'user_id': str(course.user_id)
         })
     
     return course
+
+async def get_course_by_id_and_user(db: Session, course_id: UUID, user_id: UUID) -> Course:
+    return db.query(Course).filter(Course.id == course_id, Course.user_id == user_id).first()
+
+def update_course_status(db: Session, course: Course, new_status: str):
+    course.status = new_status
+    db.add(course)
+    # The calling function is responsible for the commit.
+
+
+def get_sub_topics_for_course(db: Session, course_id: UUID) -> List[SubTopic]:
+    """Get all sub-topics for a course in correct order."""
+    return (
+        db.query(SubTopic)
+        .join(Module)
+        .filter(Module.course_id == course_id)
+        .order_by(Module.module_order, SubTopic.sub_topic_order)
+        .all()
+    )
+
+
+def get_course_by_id(db: Session, course_id: UUID) -> Optional[Course]:
+    """Get course by ID."""
+    return db.query(Course).filter(Course.id == course_id).first()
+
+
+def get_module_by_id(db: Session, module_id: UUID) -> Optional[Module]:
+    """Get module by ID."""
+    return db.query(Module).filter(Module.id == module_id).first()
+
+
+def get_summary_from_previous_sub_topic(db: Session, current_sub_topic: SubTopic) -> Optional[Dict[str, Any]]:
+    """Get summary from previous sub-topic in the same module."""
+    if current_sub_topic.sub_topic_order <= 1:
+        return None
+
+    result = (
+        db.query(SubTopic.summary_for_next_topic)
+        .filter(
+            SubTopic.module_id == current_sub_topic.module_id,
+            SubTopic.sub_topic_order == current_sub_topic.sub_topic_order - 1
+        )
+        .first()
+    )
+    return result[0] if result else None
+
+
+def get_next_sub_topic_title(db: Session, current_sub_topic: SubTopic) -> Optional[str]:
+    """Get title of next sub-topic in the same module."""
+    result = (
+        db.query(SubTopic.title)
+        .filter(
+            SubTopic.module_id == current_sub_topic.module_id,
+            SubTopic.sub_topic_order == current_sub_topic.sub_topic_order + 1
+        )
+        .first()
+    )
+    return result[0] if result else None
+
+
+def update_sub_topic_with_generated_content(
+    db: Session, 
+    sub_topic: SubTopic, 
+    generated_content: Dict[str, Any]
+) -> None:
+    """Update sub-topic with generated content."""
+    summary_for_next = generated_content.get("intelligent_summary_for_next_topic")
+    
+    sub_topic.content_blocks = generated_content
+    sub_topic.summary_for_next_topic = summary_for_next
+    sub_topic.status = "completed"
+    
+    db.add(sub_topic)
+
+
+def update_course_status_by_id(db: Session, course_id: UUID, new_status: str) -> None:
+    """Update course status by ID."""
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if course:
+        course.status = new_status
+        db.add(course)
+
+
+# --- Async functions for Milestones 1 & 2 --- #
+
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+
+async def get_course_by_id_and_user_async(db: AsyncSession, course_id: UUID, user_id: UUID) -> Course:
+    result = await db.execute(select(Course).filter(Course.id == course_id, Course.user_id == user_id))
+    return result.scalar_one_or_none()
+
+async def update_course_status_async(course: Course, new_status: str):
+    course.status = new_status
+    # The calling function will handle the commit.
+
+async def update_course_status_by_id_async(db: AsyncSession, course_id: UUID, new_status: str):
+    course = await db.get(Course, course_id)
+    if course:
+        course.status = new_status
+        await db.commit()
+
+async def get_sub_topics_for_course_async(db: AsyncSession, course_id: UUID) -> List[SubTopic]:
+    result = await db.execute(
+        select(SubTopic)
+        .join(Module)
+        .filter(Module.course_id == course_id)
+        .order_by(Module.module_order, SubTopic.sub_topic_order)
+    )
+    return result.scalars().all()
+
+async def update_sub_topic_status_async(sub_topic: SubTopic, new_status: str):
+    sub_topic.status = new_status
+    # The calling function will handle the commit.
+
+async def get_course_by_id_async(db: AsyncSession, course_id: UUID) -> Optional[Course]:
+    return await db.get(Course, course_id)
+
+async def get_module_by_id_async(db: AsyncSession, module_id: UUID) -> Optional[Module]:
+    return await db.get(Module, module_id)
+
+async def get_summary_from_previous_sub_topic_async(db: AsyncSession, current_sub_topic: SubTopic) -> Optional[Dict[str, Any]]:
+    if current_sub_topic.sub_topic_order <= 1:
+        return None
+
+    result = await db.execute(
+        select(SubTopic.summary_for_next_topic)
+        .filter(
+            SubTopic.module_id == current_sub_topic.module_id,
+            SubTopic.sub_topic_order == current_sub_topic.sub_topic_order - 1
+        )
+    )
+    return result.scalar_one_or_none()
+
+async def get_next_sub_topic_title_async(db: AsyncSession, current_sub_topic: SubTopic) -> Optional[str]:
+    result = await db.execute(
+        select(SubTopic.title)
+        .filter(
+            SubTopic.module_id == current_sub_topic.module_id,
+            SubTopic.sub_topic_order == current_sub_topic.sub_topic_order + 1
+        )
+    )
+    return result.scalar_one_or_none()
+
+async def update_sub_topic_with_generated_content_async(
+    db: AsyncSession, 
+    sub_topic: SubTopic, 
+    generated_content: Dict[str, Any]
+) -> None:
+    """
+    Updates a sub_topic record with the structured content generated by the AI.
+    """
+    summary_for_next = generated_content.get("intelligent_summary_for_next_topic")
+
+    sub_topic.content_blocks = generated_content
+    sub_topic.summary_for_next_topic = summary_for_next
+    sub_topic.status = "completed"
+
+    db.add(sub_topic)
+    # The calling orchestrator function will handle the commit.
+

@@ -1,3 +1,4 @@
+from typing import List
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -13,8 +14,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     ALGORITHM: str
 
-    # Google API
-    GOOGLE_API_KEY: str | None = None
+    # Google Gemini API Keys (comma-separated string)
+    GEMINI_API_KEYS: str = ""
 
     class Config:
         case_sensitive = True

@@ -102,16 +102,6 @@ Solusi Pelajarin.ai:
     - Memperkaya Pengalaman: Setelah konten inti terbentuk, agen ini akan meningkatkannya dengan menghasilkan ide-ide untuk elemen tambahan, seperti visuals, untuk memecah dinding teks dan membuat pembelajaran lebih menarik.
 
   - Input: Konteks kursus, judul modul, dan judul sub-topik yang sedang dikerjakan.
-  - Output (JSON Terstruktur):
-
-  ```json
-  {
-    "markdown_content": "# Judul Sub-Topik\n\n**Hook:** Paragraf pembuka yang menarik...\n\n**Penjelasan Inti:** Penjelasan konsep utama secara detail...\n\n**Contoh Praktis:** Potongan kode atau studi kasus nyata...\n\n**Poin-Poin Kunci:** Ringkasan dalam bentuk bullet points...\n\n**Jembatan:** Paragraf penutup yang menghubungkan ke topik selanjutnya...",
-    "visuals": {
-      "image_prompt": "Sebuah prompt deskriptif untuk model text-to-image...",
-      "highlight_box": "Satu fakta menarik atau analogi singkat untuk ditampilkan dalam kotak khusus..."
-    }
-  }
 
 
 - Agen #4: The Assessment Master (Sang Master Asesmen yang Mendidik)

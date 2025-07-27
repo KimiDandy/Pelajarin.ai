@@ -1,6 +1,6 @@
 import uuid
 from sqlalchemy import Column, String, text, TIMESTAMP, ForeignKey, Text, Integer
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 
 from belajaryuk_api.db.base import Base
@@ -16,5 +16,8 @@ class SubTopic(Base):
     sub_topic_order = Column(Integer, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'), nullable=False)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'), onupdate=text('now()'))
+
+    content_blocks = Column(JSONB, nullable=True)
+    summary_for_next_topic = Column(JSONB, nullable=True)
 
     module = relationship("Module", back_populates="sub_topics")

@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { courseService } from '@/services/courseService';
 import { Course } from '@/types/course';
 import CourseCard from '@/components/dashboard/CourseCard';
@@ -13,18 +13,64 @@ import StatsWidgetPanel from '@/components/dashboard/StatsWidgetPanel';
 import { QueryStateHandler } from '@/components/shared/QueryStateHandler';
 
 export default function DashboardPage() {
+  const queryClient = useQueryClient();
+
   const coursesQuery = useQuery<Course[], Error>({
     queryKey: ['courses'],
     queryFn: courseService.getCourses,
     staleTime: 5000, // Consider data fresh for 5 seconds
-    refetchInterval: (data) => {
-      // Only poll if there are generating courses
-      const hasGeneratingCourses = data?.state.data?.some((c: Course) => c.status === 'generating');
-      return hasGeneratingCourses ? 5000 : false;
-    },
   });
 
-  // React Query handles polling automatically via refetchInterval
+  useEffect(() => {
+    const eventSource = new EventSource('/api/v1/users/me/course-updates');
+
+    eventSource.onmessage = (event) => {
+      const eventData = JSON.parse(event.data);
+      const updatedCourse = JSON.parse(eventData.data);
+
+      if (eventData.event === 'course_blueprint_ready') {
+        const course = JSON.parse(eventData.data);
+        queryClient.setQueryData(['courses'], (oldData: any) => {
+          if (!oldData) return [course];
+
+          const courseExists = oldData.some((c: any) => c.id === course.id);
+
+          if (courseExists) {
+            return oldData.map((c: any) => c.id === course.id ? course : c);
+          } else {
+            return [course, ...oldData];
+          }
+        });
+      } else {
+        queryClient.setQueryData(['courses'], (oldData: any) => {
+          if (!oldData) return [updatedCourse];
+
+          const courseExists = oldData.some((c: any) => c.id === updatedCourse.id);
+
+          if (courseExists) {
+            // Update existing course
+            return oldData.map((c: any) => c.id === updatedCourse.id ? updatedCourse : c);
+          } else {
+            // Add new course to the top of the list
+            return [updatedCourse, ...oldData];
+          }
+        });
+      }
+
+      // Also, invalidate the specific course query if it's cached, 
+      // to ensure its detailed view is up-to-date.
+      queryClient.invalidateQueries({ queryKey: ['course', updatedCourse.id] });
+    };
+
+    eventSource.onerror = (err) => {
+      console.error('EventSource failed:', err);
+      eventSource.close();
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, [queryClient]);
 
   const handleCourseCreated = () => {
     // Trigger refetch when new course is created
