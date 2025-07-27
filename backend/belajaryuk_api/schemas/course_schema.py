@@ -1,9 +1,18 @@
 # backend/belajaryuk_api/schemas/course_schema.py
 
-from pydantic import BaseModel, Field, UUID4, ConfigDict
+from pydantic import BaseModel, Field, UUID4
 from typing import List, Optional
 from uuid import UUID
 from datetime import datetime
+from enum import Enum
+
+# ====================================================================
+#  ENUMS
+# ====================================================================
+class DifficultyLevel(str, Enum):
+    pemula = "pemula"
+    menengah = "menengah"
+    mahir = "mahir"
 
 # ====================================================================
 #  SCHEMAS FOR USER INPUT (CREATE)
@@ -12,7 +21,7 @@ from datetime import datetime
 class CourseCreate(BaseModel):
     """Schema for validating user input when creating a new course."""
     topic: str = Field(..., min_length=3, max_length=150, example="Pengenalan FastAPI untuk Backend")
-    difficulty: str = Field(..., example="pemula") # In the future, this could be an Enum
+    difficulty: DifficultyLevel = Field(..., example=DifficultyLevel.pemula)
     goal: str = Field(..., max_length=500, example="Membangun REST API sederhana dengan Python")
 
 
@@ -28,6 +37,15 @@ class SubTopicPublic(BaseModel):
     title: str
     sub_topic_order: int
     status: str
+
+    class Config:
+        orm_mode = True
+
+class SubTopicPublicForStream(BaseModel):
+    id: UUID
+    title: str
+    status: str
+    module_id: UUID
 
     class Config:
         orm_mode = True
@@ -57,11 +75,11 @@ class CoursePublic(BaseModel):
     id: UUID
     title: str
     description: str
+    difficulty: DifficultyLevel
     status: str
     created_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 class CourseDetail(CoursePublic):
     """Comprehensive representation of a single course with all its contents."""
@@ -69,5 +87,4 @@ class CourseDetail(CoursePublic):
     learning_outcomes: List[str] = []
     final_assessment: Optional[AssessmentPublic] = None
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}

@@ -6,6 +6,7 @@ import Sidebar from '@/components/dashboard/Sidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import CourseCreationForm from '@/components/dashboard/CourseCreationForm';
 import SentientNebulaBackground from '@/components/dashboard/SentientNebulaBackground';
+import { Toaster } from 'sonner';
 
 export default function DashboardLayout({
   children,
@@ -16,6 +17,7 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen bg-[#02040A]">
+      <Toaster position="top-center" richColors />
       <Sidebar />
       <div className="flex-1 flex flex-col relative overflow-hidden">
         <SentientNebulaBackground />

@@ -13,6 +13,8 @@ const buttonVariants = cva(
           'bg-gradient-primary text-white hover:opacity-90',
         outline:
           'border border-primary bg-transparent text-primary hover:bg-primary/10',
+        destructive:
+          'bg-red-600 text-white hover:bg-red-700/90',
       },
       size: {
         default: 'h-10 px-4',

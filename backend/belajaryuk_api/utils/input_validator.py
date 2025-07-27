@@ -7,6 +7,7 @@ before it reaches the AI agents, preventing prompt injection attacks.
 
 import re
 from typing import List, Tuple
+from belajaryuk_api.schemas.course_schema import CourseCreate
 
 
 class InputValidationError(Exception):
@@ -198,13 +199,12 @@ class InputValidator:
         return sanitized_topic, sanitized_goal, sanitized_description, errors
 
 
-def validate_course_creation_input(topic: str, goal: str = "", description: str = "") -> Tuple[str, str, str]:
+def validate_course_creation_input(course_create_data: CourseCreate) -> Tuple[str, str, str]:
     """
     Convenience function for validating course creation input.
     
     Args:
-        topic: The course topic
-        goal: The learning goal
+        course_create_data: The course creation data
         description: The course description
         
     Returns:
@@ -213,7 +213,9 @@ def validate_course_creation_input(topic: str, goal: str = "", description: str 
     Raises:
         InputValidationError: If validation fails
     """
-    sanitized_topic, sanitized_goal, sanitized_description, _ = InputValidator.validate_and_sanitize(
-        topic, goal, description
+    sanitized_topic, sanitized_goal, _, _ = InputValidator.validate_and_sanitize(
+        topic=course_create_data.topic, 
+        goal=course_create_data.goal, 
+        description=""  # CourseCreate doesn't have description field
     )
-    return sanitized_topic, sanitized_goal, sanitized_description
+    return sanitized_topic, sanitized_goal, ""

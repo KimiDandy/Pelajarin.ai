@@ -18,7 +18,7 @@ export interface SubTopic {
   id: string; // UUID
   title: string;
   sub_topic_order: number;
-  status: string;
+  status: 'pending' | 'generating_content' | 'completed' | 'failed';
 }
 
 /**
@@ -53,7 +53,7 @@ export interface Course {
   id: string; // UUID
   title: string;
   description: string;
-  status: 'generating' | 'completed' | 'failed';
+  status: 'blueprint_completed' | 'generating_content' | 'completed' | 'failed';
   created_at: string; // ISO 8601 date string
   progress?: number; // Frontend tracking for progress (0-100)
 }

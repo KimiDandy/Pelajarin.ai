@@ -2,16 +2,17 @@
 'use client';
 
 import * as Accordion from '@radix-ui/react-accordion';
-import { FiChevronDown, FiBookOpen, FiPlayCircle, FiArrowRight } from 'react-icons/fi';
+import { FiChevronDown, FiBookOpen, FiPlayCircle, FiArrowRight, FiLoader } from 'react-icons/fi';
 import { Module } from '@/types/course';
 import Link from 'next/link';
 
 interface CurriculumAccordionProps {
   modules: Module[];
   courseId: string;
+  courseStatus: 'blueprint_completed' | 'generating_content' | 'completed' | 'failed';
 }
 
-export default function CurriculumAccordion({ modules, courseId }: CurriculumAccordionProps) {
+export default function CurriculumAccordion({ modules, courseId, courseStatus }: CurriculumAccordionProps) {
   if (!modules || modules.length === 0) {
     return <p className="text-gray-400">Kurikulum untuk kursus ini belum tersedia.</p>;
   }
@@ -38,20 +39,36 @@ export default function CurriculumAccordion({ modules, courseId }: CurriculumAcc
           <Accordion.Content className="overflow-hidden text-sm data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
             <div className="p-4 pt-0">
               <ul className="space-y-2 pl-5 border-l-2 border-teal-400/30">
-                {module.sub_topics.map((subTopic) => (
-                  <li key={subTopic.id}>
-                    <Link 
-                      href={`/dashboard/course/${courseId}/subtopic/${subTopic.id}`}
-                      className="flex items-center justify-between w-full text-left p-2 -ml-2 rounded-md hover:bg-white/5 transition-colors group cursor-pointer"
-                    >
-                      <div className="flex items-start">
-                        <FiBookOpen className="w-5 h-5 text-teal-400 mr-4 mt-1 flex-shrink-0 group-hover:text-teal-300 transition-colors" />
-                        <span className="text-gray-300 group-hover:text-white transition-colors text-shadow-subtle">{subTopic.title}</span>
-                      </div>
-                      <FiArrowRight className="w-4 h-4 text-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </Link>
-                  </li>
-                ))}
+                {module.sub_topics.map((subTopic) => {
+                  const isCompleted = subTopic.status === 'completed';
+                  const isGenerating = courseStatus === 'generating_content' && !isCompleted;
+
+                  const content = (
+                    <div className="flex items-start">
+                      <FiBookOpen className={`w-5 h-5 mr-4 mt-1 flex-shrink-0 ${isCompleted ? 'text-teal-400 group-hover:text-teal-300' : 'text-gray-600'} transition-colors`} />
+                      <span className={`${isCompleted ? 'text-gray-300 group-hover:text-white' : 'text-gray-500'} transition-colors text-shadow-subtle`}>{subTopic.title}</span>
+                      {isGenerating && <FiLoader className="w-4 h-4 text-blue-400 ml-2 mt-1 animate-spin" />}
+                    </div>
+                  );
+
+                  return (
+                    <li key={subTopic.id}>
+                      {isCompleted ? (
+                        <Link 
+                          href={`/dashboard/course/${courseId}/learn/${subTopic.id}`}
+                          className="flex items-center justify-between w-full text-left p-2 -ml-2 rounded-md hover:bg-white/5 transition-colors group cursor-pointer"
+                        >
+                          {content}
+                          <FiArrowRight className="w-4 h-4 text-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </Link>
+                      ) : (
+                        <div className="flex items-center justify-between w-full text-left p-2 -ml-2 rounded-md cursor-not-allowed">
+                          {content}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
 
               {module.assessment && (

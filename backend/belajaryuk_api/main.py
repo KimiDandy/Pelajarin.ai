@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from belajaryuk_api.routers import auth_router, course_router
+from belajaryuk_api.routers import auth_router, course_router, sub_topic_router, user_router
 from belajaryuk_api.core.config import settings
 
 app = FastAPI(title=settings.PROJECT_NAME)
@@ -15,7 +15,9 @@ app.add_middleware(
 )
 
 app.include_router(auth_router.router, prefix="/api/v1/auth", tags=["Authentication"])
-app.include_router(course_router.router, prefix="/api/v1/courses", tags=["Courses"]) 
+app.include_router(course_router.router, prefix="/api/v1/courses", tags=["Courses"])
+app.include_router(sub_topic_router.router, prefix="/api/v1/sub-topics", tags=["Sub-Topics"])
+app.include_router(user_router.router, prefix="/api/v1", tags=["Users"]) 
 
 # Database initialization on startup
 from belajaryuk_api.db.session import engine
