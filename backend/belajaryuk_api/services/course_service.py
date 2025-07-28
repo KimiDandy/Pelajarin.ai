@@ -277,8 +277,8 @@ def update_sub_topic_with_generated_content(
     db: Session, 
     sub_topic: SubTopic, 
     generated_content: Dict[str, Any]
-) -> None:
-    """Update sub-topic with generated content."""
+) -> SubTopic:
+    """Update sub-topic with generated content and return the updated object."""
     summary_for_next = generated_content.get("intelligent_summary_for_next_topic")
     
     sub_topic.content_blocks = generated_content
@@ -286,6 +286,9 @@ def update_sub_topic_with_generated_content(
     sub_topic.status = "completed"
     
     db.add(sub_topic)
+    db.commit()
+    db.refresh(sub_topic)
+    return sub_topic
 
 
 def update_course_status_by_id(db: Session, course_id: UUID, new_status: str) -> None:
