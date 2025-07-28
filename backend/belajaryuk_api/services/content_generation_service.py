@@ -1,19 +1,14 @@
-import asyncio
-import json
 import logging
-from uuid import UUID
 from sqlalchemy.orm import Session
 
 # Import services and helpers
 from belajaryuk_api.services import course_service, ai_service, cancellation_service
-from belajaryuk_api.utils.sse_broadcaster import broadcaster
-from belajaryuk_api.schemas.course_schema import SubTopicPublicForStream
 
 # Setup logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-async def orchestrate_content_generation(db: Session, course_id: str):
+def orchestrate_content_generation(db: Session, course_id: str):
     cancellation_service.create_cancellation_token(course_id)
     try:
         logger.info(f"[Orchestrator] Starting content generation for course_id: {course_id}")
@@ -32,10 +27,6 @@ async def orchestrate_content_generation(db: Session, course_id: str):
                 logger.warning(f"[Orchestrator] Cancellation requested for course {course_id}. Halting process.")
                 # Revert status to blueprint_completed as generation was halted
                 course_service.update_course_status_by_id(db, course_id, "blueprint_completed")
-                await broadcaster.publish(
-                    channel=str(course_id),
-                    message=json.dumps({"event": "generation_cancelled"})
-                )
                 break
 
             if sub_topic.status == 'pending':
@@ -72,12 +63,7 @@ async def orchestrate_content_generation(db: Session, course_id: str):
                     db.refresh(updated_sub_topic)
                     logger.info(f"[Orchestrator] Sub-topic '{sub_topic.title}' content generated and saved successfully.")
 
-                    # D. Broadcast the update
-                    sub_topic_data = SubTopicPublicForStream.from_orm(updated_sub_topic).model_dump_json()
-                    await broadcaster.publish(
-                        channel=str(course_id),
-                        message=json.dumps({"event": "sub_topic_completed", "data": sub_topic_data})
-                    )
+
 
                 except Exception as e:
                     logger.error(f"[Orchestrator] Failed to process sub-topic '{sub_topic.title}': {e}", exc_info=True)
@@ -91,11 +77,7 @@ async def orchestrate_content_generation(db: Session, course_id: str):
         final_status = course_service.update_course_status_based_on_subtopics(db, course_id)
         logger.info(f"[Orchestrator] Content generation for course {course_id} finished with status: {final_status}")
 
-        # 4. Broadcast the final status
-        await broadcaster.publish(
-            channel=str(course_id),
-            message=json.dumps({"event": "generation_finished", "data": {"final_status": final_status}})
-        )
+
 
     except Exception as e:
         logger.error(f"[Orchestrator] A critical error occurred during content orchestration for course {course_id}: {e}", exc_info=True)

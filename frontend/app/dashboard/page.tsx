@@ -1,9 +1,9 @@
 // d:/Portofolio/Project/pelajarin.ai/frontend/app/dashboard/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { courseService } from '@/services/courseService';
 import { Course } from '@/types/course';
 import CourseCard from '@/components/dashboard/CourseCard';
@@ -13,69 +13,19 @@ import StatsWidgetPanel from '@/components/dashboard/StatsWidgetPanel';
 import { QueryStateHandler } from '@/components/shared/QueryStateHandler';
 
 export default function DashboardPage() {
-  const queryClient = useQueryClient();
+  const [view, setView] = useState<'grid' | 'list'>('grid');
 
   const coursesQuery = useQuery<Course[], Error>({
     queryKey: ['courses'],
     queryFn: courseService.getCourses,
-    staleTime: 5000, // Consider data fresh for 5 seconds
+    refetchInterval: (query) => {
+      const data = query.state.data as Course[] | undefined;
+      const isGenerating = data?.some(course =>
+        ['generating', 'blueprint_completed', 'generating_content'].includes(course.status)
+      );
+      return isGenerating ? 5000 : false;
+    },
   });
-
-  useEffect(() => {
-    const eventSource = new EventSource('/api/v1/users/me/course-updates');
-
-    eventSource.onmessage = (event) => {
-      const eventData = JSON.parse(event.data);
-      const updatedCourse = JSON.parse(eventData.data);
-
-      if (eventData.event === 'course_blueprint_ready') {
-        const course = JSON.parse(eventData.data);
-        queryClient.setQueryData(['courses'], (oldData: any) => {
-          if (!oldData) return [course];
-
-          const courseExists = oldData.some((c: any) => c.id === course.id);
-
-          if (courseExists) {
-            return oldData.map((c: any) => c.id === course.id ? course : c);
-          } else {
-            return [course, ...oldData];
-          }
-        });
-      } else {
-        queryClient.setQueryData(['courses'], (oldData: any) => {
-          if (!oldData) return [updatedCourse];
-
-          const courseExists = oldData.some((c: any) => c.id === updatedCourse.id);
-
-          if (courseExists) {
-            // Update existing course
-            return oldData.map((c: any) => c.id === updatedCourse.id ? updatedCourse : c);
-          } else {
-            // Add new course to the top of the list
-            return [updatedCourse, ...oldData];
-          }
-        });
-      }
-
-      // Also, invalidate the specific course query if it's cached, 
-      // to ensure its detailed view is up-to-date.
-      queryClient.invalidateQueries({ queryKey: ['course', updatedCourse.id] });
-    };
-
-    eventSource.onerror = (err) => {
-      console.error('EventSource failed:', err);
-      eventSource.close();
-    };
-
-    return () => {
-      eventSource.close();
-    };
-  }, [queryClient]);
-
-  const handleCourseCreated = () => {
-    // Trigger refetch when new course is created
-    coursesQuery.refetch();
-  };
 
   const renderContent = (view: 'grid' | 'list', courses: Course[]) => {
     if (courses.length === 0) {
@@ -114,17 +64,13 @@ export default function DashboardPage() {
         transition={{ delay: 0.5 }}
       >
         <AnimatePresence>
-          {courses.map((course, index) => (
+          {courses.map((course) => (
             <CourseRow key={course.id} course={course} />
           ))}
         </AnimatePresence>
       </motion.div>
     );
   };
-
-
-
-  const [view, setView] = useState<'grid' | 'list'>('grid');
 
   return (
     <div>

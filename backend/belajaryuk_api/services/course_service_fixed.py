@@ -1,3 +1,5 @@
+import asyncio
+import json
 import logging
 from sqlalchemy.orm import Session, joinedload, subqueryload
 from typing import List, Optional, Dict, Any
@@ -11,6 +13,8 @@ from belajaryuk_api.models.sub_topic import SubTopic
 from belajaryuk_api.models.assessment import Assessment
 from belajaryuk_api.schemas.course_schema import CourseCreate
 from belajaryuk_api.services import ai_service
+from belajaryuk_api.utils.sse_broadcaster import broadcaster
+from belajaryuk_api.schemas.course_schema import CoursePublic
 
 # Setup logger
 logger = logging.getLogger(__name__)
@@ -133,6 +137,13 @@ def generate_and_populate_course(db: Session, course_id: UUID, course_create_dat
         db.refresh(course_to_populate)
 
         logger.info(f"Blueprint for course '{course_to_populate.id}' successfully saved. Status updated to 'blueprint_completed'.")
+
+        # Broadcast that a new course is ready
+        course_data = CoursePublic.from_orm(course_to_populate).model_dump_json()
+        broadcaster.publish(
+            channel=f"user_{course_to_populate.user_id}_courses",
+            message=json.dumps({"event": "course_blueprint_ready", "data": course_data})
+        )
 
     except Exception as e:
         db.rollback()

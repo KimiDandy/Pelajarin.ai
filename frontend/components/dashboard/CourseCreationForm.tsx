@@ -10,79 +10,49 @@ import { Button } from '@/components/ui/Button';
 
 interface CourseCreationFormProps {
   onCourseCreated: () => void;
+  onClose: () => void;
 }
 
-export default function CourseCreationForm({ onCourseCreated }: CourseCreationFormProps) {
+export default function CourseCreationForm({ onCourseCreated, onClose }: CourseCreationFormProps) {
   const [topic, setTopic] = useState('');
   const [difficulty, setDifficulty] = useState('pemula');
   const [goal, setGoal] = useState('');
   const queryClient = useQueryClient();
 
   const createCourseMutation = useMutation({
-    mutationFn: (payload: CourseCreatePayload) => courseService.createCourse(payload),
+    mutationFn: (data: CourseCreatePayload) => courseService.createCourse(data),
     onMutate: async (payload) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['courses'] });
-
-      // Snapshot the previous value
       const previousCourses = queryClient.getQueryData(['courses']);
-
-      // Create optimistic course
-      const optimisticCourse: Course = {
-        id: `optimistic-${Date.now()}`,
-        title: payload.topic,
-        description: `Kursus tentang ${payload.topic} sedang dibuat oleh AI...`,
-        status: 'generating',
-        created_at: new Date().toISOString(),
-        progress: 0,
-      };
-
-      // Optimistically update the cache
-      queryClient.setQueryData(['courses'], (old: Course[] = []) => [optimisticCourse, ...old]);
-
-      // Return context for rollback
+      queryClient.setQueryData(['courses'], (old: Course[] = []) => {
+        const newCourse: Course = {
+          id: `optimistic-${Date.now()}`,
+          title: `Kursus tentang ${payload.topic}`,
+          description: 'Kurikulum sedang dibuat oleh AI...',
+          status: 'generating',
+          created_at: new Date().toISOString(),
+          progress: 0,
+        };
+        return [newCourse, ...old];
+      });
       return { previousCourses };
     },
-    onError: (error: any, variables: any, context: any) => {
-      // Rollback optimistic update on error
-      queryClient.setQueryData(['courses'], context.previousCourses);
-      
-      // Provide specific error messages based on error type
-      let errorMessage = 'Gagal membuat kursus. Silakan coba lagi.';
-      
-      if (error?.response?.status === 400) {
-        const errorDetail = error.response.data?.detail;
-        if (errorDetail?.includes('prompt injection') || errorDetail?.includes('tidak valid')) {
-          errorMessage = `Topik yang Anda masukkan mengandung kata yang tidak diizinkan. Harap gunakan topik yang lebih spesifik.`;
-        } else if (errorDetail?.includes('terlalu umum') || errorDetail?.includes('too general')) {
-          errorMessage = `Topik terlalu umum. Coba gunakan topik yang lebih spesifik seperti "${topic} untuk pemula" atau "${topic} dasar".`;
-        } else {
-          errorMessage = errorDetail || 'Topik tidak valid. Harap periksa input Anda.';
-        }
-      } else if (error?.response?.status === 500) {
-        errorMessage = 'Terjadi kesalahan server. Silakan coba beberapa saat lagi.';
-      } else {
-        errorMessage = error instanceof Error ? error.message : 'Gagal membuat kursus. Silakan coba lagi.';
-      }
-      
-      toast.error(errorMessage, {
-        duration: 5000,
-        style: {
-          maxWidth: '400px',
-        },
-      });
-    },
     onSuccess: () => {
-      toast.success('Permintaan berhasil! Kursus Anda sedang dibuat oleh AI.');
-      // Reset form
-      setTopic('');
-      setDifficulty('pemula');
-      setGoal('');
-      // Notify parent (though QueryClient handles the refetch)
+      toast.success('Permintaan kursus berhasil dikirim! AI sedang bekerja...');
       onCourseCreated();
+      onClose();
+    },
+    onError: (err: any, variables, context) => {
+      if (context?.previousCourses) {
+        queryClient.setQueryData(['courses'], context.previousCourses);
+      }
+      let errorMessage = 'Gagal membuat kursus. Silakan coba lagi.';
+      if (err?.response?.status === 400) {
+        errorMessage = err.response.data?.detail || 'Input tidak valid.';
+      }
+      toast.error(errorMessage);
     },
     onSettled: () => {
-      // Always refetch to ensure we have the latest data
       queryClient.invalidateQueries({ queryKey: ['courses'] });
     },
   });

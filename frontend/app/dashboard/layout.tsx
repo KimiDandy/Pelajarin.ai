@@ -40,7 +40,13 @@ export default function DashboardLayout({
                   exit={{ opacity: 0, scale: 0.95, y: 20 }}
                   className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden"
                 >
-                  <CourseCreationForm onCourseCreated={() => setShowCreateModal(false)} />
+                  <CourseCreationForm 
+                    onCourseCreated={() => {
+                      // This will trigger a refetch on the dashboard page via react-query's invalidation
+                      // No need to do anything else here for now
+                    }}
+                    onClose={() => setShowCreateModal(false)} 
+                  />
                 </motion.div>
               </motion.div>
             )}

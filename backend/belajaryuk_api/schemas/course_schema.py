@@ -65,7 +65,7 @@ class ModulePublic(BaseModel):
     title: str
     module_order: int
     sub_topics: List[SubTopicPublic]
-    assessment: Optional[AssessmentPublic]
+    assessment: Optional[AssessmentPublic] = None
 
     class Config:
         orm_mode = True

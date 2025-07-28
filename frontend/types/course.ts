@@ -53,7 +53,7 @@ export interface Course {
   id: string; // UUID
   title: string;
   description: string;
-  status: 'blueprint_completed' | 'generating_content' | 'completed' | 'failed';
+    status: 'generating' | 'blueprint_completed' | 'generating_content' | 'completed' | 'failed';
   created_at: string; // ISO 8601 date string
   progress?: number; // Frontend tracking for progress (0-100)
 }
