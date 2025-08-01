@@ -85,6 +85,7 @@ def generate_and_populate_course(db: Session, course_id: UUID, course_create_dat
         # Update the course with the generated content
         course_to_populate.title = blueprint.get("course_title", course_to_populate.title)
         course_to_populate.description = blueprint.get("course_description", course_to_populate.description)
+        course_to_populate.learning_outcomes = blueprint.get("learning_outcomes", [])
         course_to_populate.full_blueprint = blueprint
 
         # Iterate through the blueprint to create modules, sub-topics, etc.
@@ -262,7 +263,7 @@ def update_sub_topic_with_generated_content(
     db: Session, 
     sub_topic: SubTopic, 
     generated_content: Dict[str, Any]
-) -> None:
+) -> SubTopic:
     """Update sub-topic with generated content."""
     summary_for_next = generated_content.get("intelligent_summary_for_next_topic")
     

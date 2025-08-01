@@ -80,5 +80,6 @@ class CourseDetail(CoursePublic):
     """Comprehensive representation of a single course with all its contents."""
     modules: List[ModulePublic]
     assessments: List[AssessmentPublic] = [] # Field terpadu untuk semua asesmen
+    learning_outcomes: Optional[List[str]] = None
 
     model_config = {"from_attributes": True}

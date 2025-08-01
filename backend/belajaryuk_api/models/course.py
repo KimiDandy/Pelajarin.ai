@@ -16,6 +16,7 @@ class Course(Base):
     difficulty = Column(SQLAlchemyEnum(DifficultyLevel), nullable=False)
     status = Column(String(50), nullable=False, default='generating')
     full_blueprint = Column(JSONB, nullable=True)
+    learning_outcomes = Column(JSONB, nullable=True)  # Store as JSON array
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'), nullable=False)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'), onupdate=text('now()'))
 
