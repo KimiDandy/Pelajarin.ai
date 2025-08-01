@@ -38,8 +38,7 @@ class SubTopicPublic(BaseModel):
     sub_topic_order: int
     status: str
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 class SubTopicPublicForStream(BaseModel):
     id: UUID
@@ -47,8 +46,7 @@ class SubTopicPublicForStream(BaseModel):
     status: str
     module_id: UUID
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 class AssessmentPublic(BaseModel):
     id: UUID
@@ -57,18 +55,15 @@ class AssessmentPublic(BaseModel):
     status: str
     module_id: Optional[UUID] # To distinguish module quizzes from the final exam
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 class ModulePublic(BaseModel):
     id: UUID
     title: str
     module_order: int
     sub_topics: List[SubTopicPublic]
-    assessment: Optional[AssessmentPublic] = None
 
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
 class CoursePublic(BaseModel):
     """Basic representation of a course, used for lists."""
@@ -84,7 +79,6 @@ class CoursePublic(BaseModel):
 class CourseDetail(CoursePublic):
     """Comprehensive representation of a single course with all its contents."""
     modules: List[ModulePublic]
-    learning_outcomes: List[str] = []
-    final_assessment: Optional[AssessmentPublic] = None
+    assessments: List[AssessmentPublic] = [] # Field terpadu untuk semua asesmen
 
     model_config = {"from_attributes": True}

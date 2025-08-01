@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import { QueryStateHandler } from '@/components/shared/QueryStateHandler';
+import { Course, Module, SubTopic } from '@/types/course';
 
 interface CourseDetailPageProps {
   params: Promise<{ id: string }>;
@@ -49,20 +50,26 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
     eventSource.onmessage = (event) => {
       const eventData = JSON.parse(event.data);
 
-      queryClient.setQueryData(['course', courseId], (oldData: any) => {
+      queryClient.setQueryData(['course', courseId], (oldData: Course | undefined) => {
         if (!oldData) return oldData;
 
-        let newData = { ...oldData };
+        // Create a deep copy to avoid mutation issues
+        let newData = JSON.parse(JSON.stringify(oldData)) as Course;
 
         switch (eventData.event) {
           case 'sub_topic_completed':
-            const updatedSubTopic = JSON.parse(eventData.data);
-            newData.modules = newData.modules.map((module: any) => ({
-              ...module,
-              sub_topics: module.sub_topics.map((st: any) => 
-                st.id === updatedSubTopic.id ? { ...st, ...updatedSubTopic } : st
-              ),
-            }));
+            const updatedSubTopic: SubTopic = JSON.parse(eventData.data);
+            newData.modules = newData.modules.map((module: Module) => {
+              if (module.id === updatedSubTopic.module_id) {
+                return {
+                  ...module,
+                  sub_topics: module.sub_topics.map((st: SubTopic) => 
+                    st.id === updatedSubTopic.id ? { ...st, ...updatedSubTopic } : st
+                  ),
+                };
+              }
+              return module;
+            });
             break;
 
           case 'generation_cancelled':
@@ -155,8 +162,8 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
               </div>
             )}
             {course.status === 'generating_content' && !cancelGenerationMutation.isSuccess && (() => {
-              const completedCount = course.modules.flatMap(m => m.sub_topics).filter(st => st.status === 'completed').length;
-              const totalCount = course.modules.flatMap(m => m.sub_topics).length;
+              const completedCount = course.modules.flatMap((m: Module) => m.sub_topics).filter((st: SubTopic) => st.status === 'completed').length;
+              const totalCount = course.modules.flatMap((m: Module) => m.sub_topics).length;
               const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
               return (
@@ -220,29 +227,7 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
                   <FiArrowRight className="mr-3 text-teal-400" />
                   Curriculum
                 </h2>
-                <CurriculumAccordion modules={course.modules} courseId={course.id} courseStatus={course.status} />
-              </div>
-            )}
-
-            {course.final_assessment && (
-              <div className="mt-10 pt-8 border-t border-teal-400/20">
-                <h2 className="text-2xl font-bold text-white mb-5 text-shadow-subtle">Ujian Akhir</h2>
-                <div className="bg-black/30 backdrop-blur-sm border border-teal-400/20 rounded-lg p-6 flex items-center justify-between">
-                  <div className="flex items-center">
-                    <FiAward className="w-8 h-8 text-purple-400 mr-4" />
-                    <div>
-                      <h3 className="font-bold text-lg text-white text-shadow-subtle">{course.final_assessment.title}</h3>
-                      <p className="text-sm text-gray-400 text-shadow-subtle">Uji pemahaman Anda secara keseluruhan.</p>
-                    </div>
-                  </div>
-                  <button 
-                    className="group relative inline-flex items-center justify-center px-6 py-2.5 text-base font-semibold text-white bg-gradient-to-r from-teal-400 to-purple-400 rounded-lg hover:shadow-lg hover:shadow-teal-400/25 transition-all duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed disabled:shadow-none"
-                    disabled
-                  >
-                    <span className="text-shadow-subtle">Mulai Ujian</span>
-                    <FiArrowRight className="w-5 h-5 ml-2 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"/>
-                  </button>
-                </div>
+                <CurriculumAccordion course={course} />
               </div>
             )}
           </div>

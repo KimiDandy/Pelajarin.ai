@@ -2,17 +2,18 @@
 'use client';
 
 import * as Accordion from '@radix-ui/react-accordion';
-import { FiChevronDown, FiBookOpen, FiPlayCircle, FiArrowRight, FiLoader } from 'react-icons/fi';
-import { Module } from '@/types/course';
+import { FiChevronDown, FiBookOpen, FiPlayCircle, FiArrowRight, FiLoader, FiCheckCircle, FiAward } from 'react-icons/fi';
+import { Course } from '@/types/course';
 import Link from 'next/link';
+import { BookCheck, ShieldCheck } from 'lucide-react';
 
 interface CurriculumAccordionProps {
-  modules: Module[];
-  courseId: string;
-  courseStatus: 'blueprint_completed' | 'generating_content' | 'completed' | 'failed';
+  course: Course;
 }
 
-export default function CurriculumAccordion({ modules, courseId, courseStatus }: CurriculumAccordionProps) {
+export default function CurriculumAccordion({ course }: CurriculumAccordionProps) {
+  const { modules, id: courseId, status: courseStatus, assessments } = course;
+
   if (!modules || modules.length === 0) {
     return <p className="text-gray-400">Kurikulum untuk kursus ini belum tersedia.</p>;
   }
@@ -69,32 +70,65 @@ export default function CurriculumAccordion({ modules, courseId, courseStatus }:
                     </li>
                   );
                 })}
-              </ul>
 
-              {module.assessment && (
-                <div className="mt-6 pt-4 border-t border-teal-400/20">
-                  <div className="bg-black/20 backdrop-blur-sm border border-teal-400/20 rounded-lg p-4 flex items-center justify-between">
-                    <div className="flex items-center">
-                      <FiPlayCircle className="w-6 h-6 text-teal-400 mr-4" />
-                      <div>
-                        <h4 className="font-semibold text-white text-shadow-subtle">{module.assessment.title}</h4>
-                        <p className="text-sm text-gray-300 text-shadow-subtle">Uji pemahaman Anda untuk modul ini.</p>
-                      </div>
-                    </div>
-                    <button 
-                      className="group relative inline-flex items-center justify-center px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-teal-400 to-purple-400 rounded-lg hover:shadow-lg hover:shadow-teal-400/25 transition-all duration-300 disabled:bg-none disabled:bg-gray-600/50 disabled:text-gray-400 disabled:cursor-not-allowed disabled:shadow-none"
-                      disabled
-                    >
-                      <span className="text-shadow-subtle">Mulai Kuis</span>
-                      <FiArrowRight className="w-4 h-4 ml-2 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"/>
-                    </button>
-                  </div>
-                </div>
-              )}
+                {/* LOGIKA BARU: Render Kuis Modul */}
+                {(() => {
+                  const moduleQuiz = assessments.find(
+                    (assessment) => assessment.module_id === module.id && assessment.type === 'quiz'
+                  );
+                  if (moduleQuiz) {
+                    return (
+                      <li className="mt-3 pt-3 border-t border-teal-900/50">
+                        <Link 
+                          href={`/dashboard/course/${courseId}/assessment/${moduleQuiz.id}`}
+                          className="flex items-center justify-between w-full text-left p-2 -ml-2 rounded-md hover:bg-cyan-400/10 transition-colors group cursor-pointer"
+                        >
+                          <div className="flex items-center text-cyan-400">
+                            <BookCheck size={16} className="mr-3 flex-shrink-0" />
+                            <span className="font-semibold">{moduleQuiz.title}</span>
+                          </div>
+                          <FiArrowRight className="w-4 h-4 text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </Link>
+                      </li>
+                    );
+                  }
+                  return null;
+                })()}
+              </ul>
             </div>
           </Accordion.Content>
         </Accordion.Item>
       ))}
+
+      {/* LOGIKA BARU: Render Ujian Akhir */}
+      {(() => {
+        const finalExam = assessments.find(
+          (assessment) => assessment.type === 'final_exam'
+        );
+        if (finalExam) {
+          return (
+            <div className="mt-6">
+              <Link 
+                href={`/dashboard/course/${courseId}/assessment/${finalExam.id}`}
+                className="group relative flex items-center justify-between w-full text-left p-4 bg-gradient-to-r from-purple-600/20 to-teal-600/20 via-transparent border border-purple-400/30 rounded-lg hover:border-purple-400/60 transition-all duration-300"
+              >
+                <div className="flex items-center">
+                  <ShieldCheck size={24} className="mr-4 text-purple-400" />
+                  <div>
+                    <h3 className="font-bold text-lg text-white text-shadow-subtle">{finalExam.title}</h3>
+                    <p className="text-sm text-gray-400 text-shadow-subtle">Uji pemahaman Anda secara keseluruhan.</p>
+                  </div>
+                </div>
+                <button className="font-semibold text-white bg-purple-600/50 hover:bg-purple-500/50 px-5 py-2 rounded-lg flex items-center transition-colors">
+                  Mulai Ujian
+                  <FiArrowRight className="w-4 h-4 ml-2 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"/>
+                </button>
+              </Link>
+            </div>
+          );
+        }
+        return null;
+      })()}
     </Accordion.Root>
   );
 }

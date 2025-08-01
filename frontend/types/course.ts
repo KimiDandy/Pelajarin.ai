@@ -19,6 +19,7 @@ export interface SubTopic {
   title: string;
   sub_topic_order: number;
   status: 'pending' | 'generating_content' | 'completed' | 'failed';
+  module_id?: string; // UUID, included in stream events
 }
 
 /**
@@ -42,28 +43,24 @@ export interface Module {
   title: string;
   module_order: number;
   sub_topics: SubTopic[];
-  assessment?: Assessment; // The module-specific quiz
+  // assessment field is removed as it's now handled in the main assessments array
 }
 
 /**
- * Basic representation of a course, used for lists.
- * Corresponds to the CoursePublic schema.
+ * Comprehensive representation of a single course with all its contents.
+ * This now represents the single source of truth for a detailed course object.
+ * Corresponds to the unified CourseDetail schema in the backend.
  */
 export interface Course {
   id: string; // UUID
   title: string;
   description: string;
-    status: 'generating' | 'blueprint_completed' | 'generating_content' | 'completed' | 'failed';
+  status: 'generating' | 'blueprint_completed' | 'generating_content' | 'completed' | 'failed';
   created_at: string; // ISO 8601 date string
-  progress?: number; // Frontend tracking for progress (0-100)
-}
-
-/**
- * Comprehensive representation of a single course with all its contents.
- * Corresponds to the CourseDetail schema.
- */
-export interface CourseDetail extends Course {
-  learning_outcomes: string[];
+  difficulty: string;
   modules: Module[];
-  final_assessment?: Assessment;
+  assessments: Assessment[];
+  // Optional fields that might not always be present
+  learning_outcomes?: string[];
+  progress?: number; // Frontend tracking for progress (0-100)
 }

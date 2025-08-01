@@ -159,12 +159,15 @@ def get_course_details_by_id(db: Session, course_id: UUID, user_id: UUID) -> Cou
     """Retrieves a single course with all its details, ensuring user ownership."""
     from sqlalchemy.orm import selectinload
     from belajaryuk_api.services.redis_service import redis_service
-    
+    from belajaryuk_api.schemas.course_schema import CourseDetail # Import schema
+    import json
+
     # Check Redis cache first
-    cached_course = redis_service.get_course_detail(course_id, user_id)
-    # Validate cache: if the required 'difficulty' field is missing, treat as a cache miss.
-    if cached_course and 'difficulty' in cached_course:
-        # Return cached course object (ORM object simulation)
+    cached_course_json = redis_service.get_course_detail(course_id, user_id)
+    if cached_course_json:
+        # If cache hit, we still need the ORM object for the function's return type contract.
+        # The cache is primarily for the API response layer, but here we ensure consistency.
+        # A more advanced implementation might refactor this to avoid hitting DB on cache hit.
         return (
             db.query(Course)
             .options(
@@ -174,7 +177,7 @@ def get_course_details_by_id(db: Session, course_id: UUID, user_id: UUID) -> Cou
             .filter(Course.id == course_id, Course.user_id == user_id)
             .first()
         )
-    
+
     # Cache miss - fetch from database
     course = (
         db.query(Course)
@@ -185,20 +188,15 @@ def get_course_details_by_id(db: Session, course_id: UUID, user_id: UUID) -> Cou
         .filter(Course.id == course_id, Course.user_id == user_id)
         .first()
     )
-    
+
     if course:
-        # Cache the result (5 minutes TTL)
-        # Cache the result, ensuring all required fields for CourseDetail are present
-        redis_service.set_course_detail(course_id, user_id, {
-            'id': str(course.id),
-            'title': course.title,
-            'description': course.description,
-            'difficulty': course.difficulty.value, # Add difficulty to cache
-            'status': course.status,
-            'created_at': str(course.created_at),
-            'user_id': str(course.user_id)
-        })
-    
+        # Create a Pydantic model from the ORM object
+        course_detail_schema = CourseDetail.from_orm(course)
+        # Convert the Pydantic model to a JSON string for caching
+        course_json = course_detail_schema.model_dump_json()
+        # Cache the full, correct JSON data
+        redis_service.set_course_detail(course_id, user_id, course_json)
+
     return course
 
 def get_course_by_id_and_user(db: Session, course_id: UUID, user_id: UUID) -> Course:
